@@ -6,7 +6,7 @@ import { JwtAuthGuard } from '../../shared/guards/jwt.auth.guard';
 import { Right, RightsGuard } from '../../shared/guards/rights.guard';
 import { EApplicationRight } from '../../database/enums/questionit.application.enum';
 import { Request } from 'express';
-import { RateLimit, RateLimitGuard } from 'src/shared/guards/rate.limit.guard';
+import { RateLimit, RateLimitGuard } from '../../shared/guards/rate.limit.guard';
 import { Timing } from '../../shared/utils/time.utils';
 
 @Controller()

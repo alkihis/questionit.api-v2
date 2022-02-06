@@ -20,6 +20,7 @@ import { NotificationModule } from '../features/notification/notification.module
 import { serveStaticModule } from '../static/serve.static.module';
 import { ApplicationModule } from '../features/application/application.module';
 import { BlockModule } from '../features/block/block.module';
+import { LikeModule } from '../features/like/like.module';
 
 const featureModules = [
   UserModule,
@@ -28,6 +29,7 @@ const featureModules = [
   NotificationModule,
   ApplicationModule,
   BlockModule,
+  LikeModule,
 ];
 
 @Module({

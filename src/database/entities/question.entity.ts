@@ -70,7 +70,7 @@ export class Question {
   @JoinColumn({ name: 'owner_id' })
   owner: User;
 
-  @Column('int', { name: 'receiver_id', nullable: true })
+  @Column('int', { name: 'receiver_id', nullable: false })
   receiverId: number;
 
   @ManyToOne(type => User, user => user.receivedQuestions, { cascade: true, nullable: false, onDelete: 'CASCADE' })
