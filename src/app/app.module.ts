@@ -19,6 +19,7 @@ import { RelationshipModule } from '../features/relationship/relationship.module
 import { NotificationModule } from '../features/notification/notification.module';
 import { serveStaticModule } from '../static/serve.static.module';
 import { ApplicationModule } from '../features/application/application.module';
+import { BlockModule } from '../features/block/block.module';
 
 const featureModules = [
   UserModule,
@@ -26,6 +27,7 @@ const featureModules = [
   RelationshipModule,
   NotificationModule,
   ApplicationModule,
+  BlockModule,
 ];
 
 @Module({
