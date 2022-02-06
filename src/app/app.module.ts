@@ -18,12 +18,14 @@ import { TokenModule } from '../features/token/token.module';
 import { RelationshipModule } from '../features/relationship/relationship.module';
 import { NotificationModule } from '../features/notification/notification.module';
 import { serveStaticModule } from '../static/serve.static.module';
+import { ApplicationModule } from '../features/application/application.module';
 
 const featureModules = [
   UserModule,
   TokenModule,
   RelationshipModule,
   NotificationModule,
+  ApplicationModule,
 ];
 
 @Module({

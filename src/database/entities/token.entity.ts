@@ -40,13 +40,13 @@ export class Token {
   @JoinColumn({ name: 'owner_id' })
   owner: User;
 
-  @Column('int', { name: 'app_id', nullable: false })
+  @Column('int', { name: 'app_id', nullable: true })
   appId: number;
 
   @ManyToOne(
     type => QuestionItApplication,
     app => app.tokens,
-    { cascade: true, nullable: false, onDelete: 'CASCADE' },
+    { cascade: true, nullable: true, onDelete: 'CASCADE' },
   )
   @JoinColumn({ name: 'app_id', })
   application: QuestionItApplication;

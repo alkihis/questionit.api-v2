@@ -1,12 +1,12 @@
-export interface SentApplication extends SentRegistredApplication {
+export interface ISentApplication extends ISentRegistredApplication {
   key: string;
 }
 
-export interface SentRegistredApplication {
+export interface ISentRegistredApplication {
   name: string;
   id: string;
   url: string;
-  rights: { [rightName: string]: string };
+  rights: { [rightName: string]: boolean };
 }
 
 export type TPossibleRight = 'sendQuestion' | 'answerQuestion' | 'likeQuestion'

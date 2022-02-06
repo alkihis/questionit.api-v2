@@ -13,6 +13,9 @@ import { ISentToken } from '../../../database/interfaces/token.interface';
 import { SendableRelationshipSharedService, TPreloadedRelationships } from './sendable.relationship.shared.service';
 import { Notification } from '../../../database/entities/notification.entity';
 import { ISentNotification } from '../../../database/interfaces/notification.interface';
+import { QuestionItApplication } from '../../../database/entities/questionit.application.entity';
+import { getRightsAsObject } from '../../utils/rights.utils';
+import { ISentApplication } from '../../../database/interfaces/questionit.application.interface';
 
 type TPreloadedUserPinnedQuestions = { [userId: number]: ISentQuestion };
 
@@ -293,6 +296,32 @@ export class SendableSharedService {
     }
 
     return pinnedQuestionMap;
+  }
+
+  /* Applications */
+
+  getSendableApplications(applications: QuestionItApplication[]): ISentApplication[] {
+    return applications.map(app => this.getSendableApplication(app));
+  }
+
+  getSendableApplication(application: QuestionItApplication): ISentApplication {
+    return {
+      id: application.id.toString(),
+      name: application.name,
+      key: application.key,
+      rights: getRightsAsObject(Number(application.defaultRights)),
+      url: application.url,
+    };
+  }
+
+  getSendableApplicationFromToken(token: Token): ISentApplication {
+    return {
+      id: token.application.id.toString(),
+      name: token.application.name,
+      key: token.application.key,
+      rights: getRightsAsObject(Number(token.rights)),
+      url: token.application.url,
+    };
   }
 
   /* Assets */

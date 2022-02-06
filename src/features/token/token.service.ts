@@ -23,6 +23,7 @@ import { QuestionItApplication } from '../../database/entities/questionit.applic
 import * as CryptoJS from 'crypto-js';
 import { IRequestTokenData } from '../../database/interfaces/token.interface';
 import { ERedisExpiration, ERedisPrefix, RedisService } from '../../shared/modules/redis/redis.service';
+import { isAppTokenExpired } from '../../shared/utils/application.token.utils';
 
 @Injectable()
 export class TokenService {
@@ -265,10 +266,6 @@ export class TokenService {
     });
   }
 
-  private isTokenExpired(date: Date) {
-    return date.getTime() + (15 * 60 * 1000) < Date.now();
-  }
-
   private async getAppAndTokenFromCreateTokenRequest(dto: CreateTokenDto) {
     const appToken = await this.db.getRepository(ApplicationToken)
       .findOne({ where: { token: dto.token } });
@@ -282,7 +279,7 @@ export class TokenService {
       throw ErrorService.create(EApiError.InvalidExpiredToken);
     }
     // Check if token is expired (15 minutes max from now)
-    if (this.isTokenExpired(appToken.createdAt)) {
+    if (isAppTokenExpired(appToken.createdAt)) {
       // Expired token
       throw ErrorService.create(EApiError.InvalidExpiredToken);
     }

@@ -26,6 +26,8 @@ const config = {
     NAME_REGEX: /^.{2,32}$/i,
     BLOCKED_WORDS_REGEX: /^[\p{L}\p{N}_. -]{2,32}$/iu,
     FILE_SIZE: 5 * 1024 * 1024,
+    APP_REQUEST_TOKEN_EXPIRATION: 15 * 60 * 1000, // 15 minutes
+    APPS_PER_USER: 5,
   },
   REDIS: {
     HOST: process.env.REDIS_HOST || 'redis-single',
