@@ -21,6 +21,7 @@ import { serveStaticModule } from '../static/serve.static.module';
 import { ApplicationModule } from '../features/application/application.module';
 import { BlockModule } from '../features/block/block.module';
 import { LikeModule } from '../features/like/like.module';
+import { PollModule } from '../features/poll/poll.module';
 
 const featureModules = [
   UserModule,
@@ -30,6 +31,7 @@ const featureModules = [
   ApplicationModule,
   BlockModule,
   LikeModule,
+  PollModule,
 ];
 
 @Module({

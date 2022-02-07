@@ -138,11 +138,11 @@ export class RelationshipService {
     await this.db.getRepository(Relationship).delete({ fromUserId: sourceUser.id, toUserId: targetUserId });
     // Delete the possible follow notifications
     await this.db.getRepository(Notification)
-      .createQueryBuilder('notification')
+      .createQueryBuilder()
       .delete()
-      .where('notification.type IN (:...followNotificationTypes)', { followNotificationTypes: [ENotificationType.Follow, ENotificationType.FollowBack] })
-      .andWhere('notification.relatedTo = :fromUserId', { fromUserId: sourceUser.id })
-      .andWhere('notification.userId = :targetUserId', { targetUserId })
+      .where('type IN (:...followNotificationTypes)', { followNotificationTypes: [ENotificationType.Follow, ENotificationType.FollowBack] })
+      .andWhere('relatedTo = :fromUserId', { fromUserId: sourceUser.id })
+      .andWhere('userId = :targetUserId', { targetUserId })
       .execute();
 
     return await this.getRelationshipBetween(sourceUser.id, targetUserId);

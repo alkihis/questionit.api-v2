@@ -61,7 +61,7 @@ export class User {
   @Column('bool', { name: 'visible', default: true })
   visible: boolean;
 
-  @Column('jsonb', { name: 'blocked_words', nullable: false, default: () => `'[]'` })
+  @Column('jsonb', { name: 'blocked_words', nullable: false, default: () => 'jsonb_build_array()' })
   blockedWords: string[];
 
   @Column('bool', { name: 'drop_questions_on_blocked_word', default: false, nullable: false })
@@ -118,6 +118,4 @@ export class User {
 
   @OneToMany(type => Notification, notif => notif.user)
   notifications: Notification[];
-
-
 }

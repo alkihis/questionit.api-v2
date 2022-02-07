@@ -22,6 +22,7 @@ const config = {
     ANSWER_LENGTH: 600,
     ASK_ME_MESSAGE_LIMIT: 60,
     SLUG_LENGTH: 20,
+    POLL_OPTION_LENGTH: 32,
     SLUG_REGEX: /^[a-z_-][a-z0-9_-]{1,19}$/i,
     NAME_REGEX: /^.{2,32}$/i,
     BLOCKED_WORDS_REGEX: /^[\p{L}\p{N}_. -]{2,32}$/iu,

@@ -16,10 +16,7 @@ export class Poll {
   @Column('varchar', { name: 'emitter_ip', nullable: true, length: 64, default: null })
   emitterIp: string;
 
-  @Column('jsonb', {
-    name: 'options',
-    nullable: true,
-  })
+  @Column('jsonb', { name: 'options', nullable: false })
   options: string[];
 
   @Column('int', { name: 'owner_id', nullable: false })
@@ -32,7 +29,7 @@ export class Poll {
   @Column('int', { name: 'question_id', nullable: true })
   questionId: number;
 
-  @OneToOne(type => Question, question => question.poll, { cascade: true, nullable: false, onDelete: 'CASCADE' })
+  @OneToOne(type => Question, question => question.poll, { cascade: true, nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'question_id' })
   question: Question;
 }

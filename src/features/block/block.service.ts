@@ -71,10 +71,10 @@ export class BlockService {
 
     // Remove any relationship between the two user
     await this.db.getRepository(Relationship)
-      .createQueryBuilder('relationship')
+      .createQueryBuilder()
       .delete()
-      .where('(relationship.fromUserId = :sourceUserId AND relationship.toUserId = :targetUserId)')
-      .orWhere('(relationship.toUserId = :sourceUserId AND relationship.fromUserId = :targetUserId)')
+      .where('(fromUserId = :sourceUserId AND toUserId = :targetUserId)')
+      .orWhere('(toUserId = :sourceUserId AND fromUserId = :targetUserId)')
       .setParameters({ targetUserId: target.id, sourceUserId: source.id })
       .execute();
 

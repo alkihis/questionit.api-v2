@@ -3,26 +3,26 @@ import { BullModule, InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { EQueueCronName } from '../../queue.enum';
 import { cronQueueCleanOldJobs } from '../../../utils/queue.utils';
-import { MediaCleaningQueueConsumer } from './media.cleaning.queue.consumer';
+import { UnaffectedPollsQueueConsumer } from './unaffected.polls.queue.consumer';
 
 @Module({
   imports: [
     BullModule.registerQueue({
-      name: EQueueCronName.MediasCleaning,
+      name: EQueueCronName.UnaffectedPolls,
       defaultJobOptions: {
-        jobId: EQueueCronName.MediasCleaning,
+        jobId: EQueueCronName.UnaffectedPolls,
         removeOnComplete: true,
         removeOnFail: false,
         repeat: {
-          cron: '0 * * * *',
+          cron: '*/15 * * * *',
         },
       },
     }),
   ],
-  providers: [MediaCleaningQueueConsumer],
+  providers: [UnaffectedPollsQueueConsumer],
 })
-export class MediaCleaningQueueModule {
-  constructor(@InjectQueue(EQueueCronName.MediasCleaning) private readonly queue: Queue) {
+export class UnaffectedPollsQueueModule {
+  constructor(@InjectQueue(EQueueCronName.UnaffectedPolls) private readonly queue: Queue) {
     // clean every old jobs
     cronQueueCleanOldJobs(this.queue)
       .finally(() => {
