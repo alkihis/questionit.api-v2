@@ -11,6 +11,7 @@ import { QuestionItApplication } from '../../database/entities/questionit.applic
 import crypto from 'crypto';
 import CryptoJS from 'crypto-js';
 import RandomJS from 'random-js';
+import urlSafeBase64 from 'urlsafe-base64';
 import { IRequestTokenData } from '../../database/interfaces/token.interface';
 import config from '../../shared/config/config';
 import { RequestUserManager } from '../../shared/managers/request.user.manager';
@@ -249,6 +250,6 @@ export class ApplicationService {
   }
 
   private getFreshTokenId() {
-    return crypto.randomBytes(16).toString('base64');
+    return urlSafeBase64.encode(crypto.randomBytes(16));
   }
 }

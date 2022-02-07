@@ -39,6 +39,10 @@ export class RequestUserManager {
     return this.entity.id;
   }
 
+  get slug() {
+    return this.entity.slug;
+  }
+
   get role() {
     return this.entity.role;
   }
