@@ -4,7 +4,7 @@ export interface ISentApplication extends ISentRegistredApplication {
 
 export interface ISentRegistredApplication {
   name: string;
-  id: string;
+  id: number;
   url: string;
   rights: { [rightName: string]: boolean };
 }

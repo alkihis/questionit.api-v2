@@ -2,7 +2,7 @@ import { ISentRelationship } from './relationship.interface';
 import { ISentQuestion } from './question.interface';
 
 export interface ISentUser {
-  id: string;
+  id: number;
   name: string;
   slug: string;
   twitterId: string;

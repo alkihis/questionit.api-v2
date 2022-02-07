@@ -23,6 +23,7 @@ import { BlockModule } from '../features/block/block.module';
 import { LikeModule } from '../features/like/like.module';
 import { PollModule } from '../features/poll/poll.module';
 import { PushModule } from '../features/push/push.module';
+import { QuestionModule } from '../features/question/question.module';
 
 const featureModules = [
   UserModule,
@@ -34,6 +35,7 @@ const featureModules = [
   LikeModule,
   PollModule,
   PushModule,
+  QuestionModule,
 ];
 
 @Module({

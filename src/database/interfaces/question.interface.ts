@@ -1,7 +1,7 @@
 import { ISentUser } from './user.interface';
 
 export interface ISentQuestion {
-  id: string;
+  id: number;
   // null if owner made question in anonymous mode
   owner: ISentUser | null;
   receiver: ISentUser;
@@ -16,7 +16,7 @@ export interface ISentQuestion {
 }
 
 export interface ISentAnswer {
-  id: string;
+  id: number;
   content: string;
   createdAt: string;
   liked: boolean;
@@ -34,6 +34,6 @@ export interface SentQuestionAttachements {
 }
 
 export interface ISentPoll {
-  id: string;
+  id: number;
   options: string[];
 }

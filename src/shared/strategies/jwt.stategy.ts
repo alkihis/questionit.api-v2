@@ -69,8 +69,9 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       }
     }
 
+    const loginIp = request.ips?.join(',') || request.ip;
     entity.lastLoginAt = new Date();
-    entity.lastIp = request.ips?.join(',') || request.ip;
+    entity.lastIp = loginIp;
 
     await this.db.getRepository(Token).save(entity);
 
@@ -93,6 +94,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       emission: payload.iat,
       applicationId: payload.appId || null,
       rights,
+      loginIp,
     });
   }
 }

@@ -12,6 +12,19 @@ export class BlockSharedService {
     @InjectConnection() private db: Connection,
   ) {}
 
+  async ensureNoBlocksExists(sourceUserId: number, targetUserId: number) {
+    const blockCount = await this.db.getRepository(Block)
+      .createQueryBuilder('block')
+      .where('(block.ownerId = :sourceUserId AND block.targetId = :targetUserId)')
+      .orWhere('(block.targetId = :sourceUserId AND block.ownerId = :targetUserId)')
+      .setParameters({ sourceUserId, targetUserId })
+      .getCount();
+
+    if (blockCount) {
+      throw ErrorService.throw(EApiError.OneBlockBetweenUsersExists);
+    }
+  }
+
   async ensureUserCanSeeTarget(user: RequestUserManager, targetId: number) {
     const canSeeTarget = await this.canUserSeeTarget(user, targetId);
 

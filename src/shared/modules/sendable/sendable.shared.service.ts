@@ -16,6 +16,7 @@ import { ISentNotification } from '../../../database/interfaces/notification.int
 import { QuestionItApplication } from '../../../database/entities/questionit.application.entity';
 import { getRightsAsObject } from '../../utils/rights.utils';
 import { ISentApplication } from '../../../database/interfaces/questionit.application.interface';
+import { DayQuestion, TDayQuestionLanguage } from '../../../database/entities/day.question.entity';
 
 type TPreloadedUserPinnedQuestions = { [userId: number]: ISentQuestion };
 
@@ -29,6 +30,12 @@ export interface IFetchSendableUsers {
 
 export interface IFetchSendableQuestion {
   context?: User;
+  withUserRelationships?: boolean;
+}
+
+export interface IFetchSendableDayQuestion {
+  context?: User;
+  lang: TDayQuestionLanguage;
 }
 
 export interface IFetchSendableNotification {
@@ -72,14 +79,14 @@ export class SendableSharedService {
 
     for (const notification of notifications) {
       const sentNotification: ISentNotification = {
-        id: notification.id.toString(),
+        id: notification.id,
         createdAt: notification.createdAt.toISOString(),
         seen: notification.seen,
         type: notification.type,
       };
 
       if (notification.type === 'answered' || notification.type === 'question') {
-        sentNotification.question = questions.find(q => q.id === notification.relatedTo.toString());
+        sentNotification.question = questions.find(q => q.id === notification.relatedTo);
 
         if (!sentNotification.question) {
           Logger.warn(`Notification ${notification.id} of type ${notification.type}, related to #${notification.relatedTo} is not bound to a question.`);
@@ -88,7 +95,7 @@ export class SendableSharedService {
           continue;
         }
       } else {
-        sentNotification.user = users.find(q => q.id === notification.relatedTo.toString());
+        sentNotification.user = users.find(q => q.id === notification.relatedTo);
 
         if (!sentNotification.user) {
           Logger.warn(`Notification ${notification.id} of type ${notification.type}, related to #${notification.relatedTo} is not bound to a user.`);
@@ -133,6 +140,27 @@ export class SendableSharedService {
 
   /* Questions */
 
+  async getSendableQuestionFromDayQuestion(dayQuestion: DayQuestion, options: IFetchSendableDayQuestion): Promise<ISentQuestion> {
+    let preloadedUser: ISentUser;
+
+    if (options.context) {
+      preloadedUser = await this.getSendableUser(options.context, { context: options.context, withRelationships: true });
+    }
+
+    return {
+      id: dayQuestion.id,
+      owner: null,
+      receiver: preloadedUser,
+      createdAt: new Date().toISOString(),
+      content: dayQuestion.content[options.lang],
+      seen: false,
+      answer: null,
+      inReplyToQuestionId: null,
+      questionOfTheDay: true,
+      replyCount: 0,
+    };
+  }
+
   async getSendableQuestion(question: Question, options: IFetchSendableQuestion = {}) {
     const result = await this.getSendableQuestions([question], options);
     return result[0];
@@ -149,7 +177,7 @@ export class SendableSharedService {
     const answers = await this.sendableQuestionService.preloadAnswers(options.context, questions.map(q => q.id));
 
     // 2) Users
-    const users = await this.preloadQuestionUsers(options.context, questions);
+    const users = await this.preloadQuestionUsers(questions, options);
 
     // 3) Counts
     const repliesCounts = await this.sendableQuestionService.preloadQuestionsReplyCount(questions.map(q => q.id));
@@ -158,7 +186,7 @@ export class SendableSharedService {
 
     for (const question of questions) {
       const sentQuestion: ISentQuestion = {
-        id: String(question.id),
+        id: question.id,
         owner: question.ownerId ? users[question.ownerId] : null,
         receiver: users[question.receiverId],
         createdAt: question.createdAt.toISOString(),
@@ -173,7 +201,7 @@ export class SendableSharedService {
       if (polls[question.id]) {
         sentQuestion.attachements = {
           poll: {
-            id: polls[question.id].id.toString(),
+            id: polls[question.id].id,
             options: polls[question.id].options,
           },
         };
@@ -187,7 +215,7 @@ export class SendableSharedService {
 
   // - Question Property Preloading -
 
-  private async preloadQuestionUsers(context: User | undefined, questions: Question[]) {
+  private async preloadQuestionUsers(questions: Question[], options: IFetchSendableQuestion) {
     const allUsers = new Set<number>([
       ...questions.map(q => q.ownerId).filter(u => u),
       ...questions.map(q => q.receiverId).filter(u => u),
@@ -199,8 +227,8 @@ export class SendableSharedService {
 
     const users = await this.db.getRepository(User).findByIds([...allUsers]);
     return this.getSendableUsers(users, {
-      context,
-      withRelationships: true,
+      context: options.context,
+      withRelationships: options.withUserRelationships,
     });
   }
 
@@ -235,7 +263,7 @@ export class SendableSharedService {
 
     for (const user of users) {
       const sentUser: ISentUser = {
-        id: String(user.id),
+        id: user.id,
         createdAt: user.createdAt.toISOString(),
         name: user.name,
         slug: user.slug,
@@ -289,7 +317,7 @@ export class SendableSharedService {
 
     for (const user of users) {
       if (user.pinnedQuestionId) {
-        pinnedQuestionMap[user.id] = questions.find(q => q.id === String(user.pinnedQuestionId)) || null;
+        pinnedQuestionMap[user.id] = questions.find(q => q.id === user.pinnedQuestionId) || null;
       } else {
         pinnedQuestionMap[user.id] = null;
       }
@@ -306,7 +334,7 @@ export class SendableSharedService {
 
   getSendableApplication(application: QuestionItApplication): ISentApplication {
     return {
-      id: application.id.toString(),
+      id: application.id,
       name: application.name,
       key: application.key,
       rights: getRightsAsObject(Number(application.defaultRights)),
@@ -316,7 +344,7 @@ export class SendableSharedService {
 
   getSendableApplicationFromToken(token: Token): ISentApplication {
     return {
-      id: token.application.id.toString(),
+      id: token.application.id,
       name: token.application.name,
       key: token.application.key,
       rights: getRightsAsObject(Number(token.rights)),

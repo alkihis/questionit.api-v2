@@ -27,7 +27,7 @@ export class PollService {
     await this.db.getRepository(Poll).save(poll);
 
     return {
-      id: poll.id.toString(),
+      id: poll.id,
       expiration: pollValidity.toMillis(),
     };
   }

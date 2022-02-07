@@ -46,7 +46,7 @@ export class ErrorService {
     [EApiError.NotAnsweredYet]: [HttpStatus.FORBIDDEN, 'This question has not beed answered yet.'],
     [EApiError.TooManyReplies]: [HttpStatus.FORBIDDEN, 'This question already have enough replies.'],
     [EApiError.BlockByThisUser]: [HttpStatus.FORBIDDEN, 'You are blocked by this user.'],
-    [EApiError.HaveBlockedThisUser]: [HttpStatus.FORBIDDEN, 'You have blocked this user, you can\'t send him questions.'],
+    [EApiError.OneBlockBetweenUsersExists]: [HttpStatus.FORBIDDEN, 'One block exists between you and the target user, so you cannot send questions.'],
     [EApiError.BannedUser]: [HttpStatus.FORBIDDEN, 'Your account can\'t do actions right now.'],
     [EApiError.TokenNotAffilated]: [HttpStatus.FORBIDDEN, 'This token has not been approved yet.'],
     [EApiError.TooManyApplications]: [HttpStatus.FORBIDDEN, 'You already have too many applications.'],

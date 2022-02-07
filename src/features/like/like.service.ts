@@ -8,6 +8,7 @@ import { ErrorService } from '../../shared/modules/errors/error.service';
 import { EApiError } from '../../shared/modules/errors/error.enum';
 import { Like } from '../../database/entities/like.entity';
 import { BlockSharedService } from '../../shared/modules/blocks/block.shared.service';
+import { EApplicationRight } from '../../database/enums/questionit.application.enum';
 
 @Injectable()
 export class LikeService {
@@ -27,7 +28,10 @@ export class LikeService {
       await likeRepository.save(likeRepository.create({ emitterId: user.id, answerId }));
     }
 
-    return await this.sendableService.getSendableQuestion(question, { context: user.entity });
+    return await this.sendableService.getSendableQuestion(question, {
+      context: user.entity,
+      withUserRelationships: user.hasRight(EApplicationRight.ReadRelationship),
+    });
   }
 
   async deleteLike(user: RequestUserManager, answerId: number) {
@@ -36,7 +40,10 @@ export class LikeService {
     await this.db.getRepository(Like)
       .delete({ emitterId: user.id, answerId });
 
-    return await this.sendableService.getSendableQuestion(question, { context: user.entity });
+    return await this.sendableService.getSendableQuestion(question, {
+      context: user.entity,
+      withUserRelationships: user.hasRight(EApplicationRight.ReadRelationship),
+    });
   }
 
   private getQuestionWithAnswer(answerId: number) {

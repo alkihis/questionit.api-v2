@@ -1,5 +1,5 @@
 
 export interface IUnusedSentPoll {
-  id: string;
+  id: number;
   expiration: number;
 }

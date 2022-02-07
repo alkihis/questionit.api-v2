@@ -29,6 +29,7 @@ const config = {
     FILE_SIZE: 5 * 1024 * 1024,
     APP_REQUEST_TOKEN_EXPIRATION: 15 * 60 * 1000, // 15 minutes
     APPS_PER_USER: 5,
+    MAX_NEW_LINES_IN_QUESTIONS: 12,
   },
   REDIS: {
     HOST: process.env.REDIS_HOST || 'redis-single',
@@ -71,9 +72,15 @@ const config = {
   },
   DATA: {
     BANNED_IPS: path.resolve(rootDir, 'data', 'banned.ips.json'),
+    BANNED_WORDS: path.resolve(rootDir, 'data', 'banned.words.json'),
   },
   WORKERS: {
     IMAGE_CONVERTOR: path.resolve(rootDir, 'dist', 'shared', 'workers', 'image.convertor.worker.js'),
+    MUTED_WORDS: path.resolve(rootDir, 'dist', 'shared', 'workers', 'muted.words.worker.js'),
+  },
+  DAY_QUESTIONS: {
+    FORCED_CURRENT: null as number | null,
+    LANGUAGES: ['fr', 'en'],
   },
 } as const;
 

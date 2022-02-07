@@ -56,7 +56,7 @@ export class SendableQuestionSharedService {
 
       if (answer) {
         preloadedAnswers[questionId] = {
-          id: String(answer.id),
+          id: answer.id,
           content: answer.content,
           createdAt: answer.createdAt.toISOString(),
           liked: answersLiked.has(answer.id),

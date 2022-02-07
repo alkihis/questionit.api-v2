@@ -36,7 +36,7 @@ export enum EApiError {
   TooManyReplies,
   NotAnsweredYet,
   BlockByThisUser,
-  HaveBlockedThisUser,
+  OneBlockBetweenUsersExists,
   BannedUser,
   TokenNotAffilated,
   TooManyApplications,

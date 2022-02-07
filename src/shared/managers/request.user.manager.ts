@@ -9,6 +9,7 @@ export interface IRequestTokenInformation {
   expires: number;
   emission: number;
   applicationId: string | null;
+  loginIp: string;
 }
 
 export class RequestUserManager {
@@ -49,5 +50,9 @@ export class RequestUserManager {
 
   get rights() {
     return this.requestTokenInformation.rights;
+  }
+
+  get loginIp() {
+    return this.requestTokenInformation.loginIp;
   }
 }

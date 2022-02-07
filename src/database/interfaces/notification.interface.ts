@@ -9,7 +9,7 @@ export enum ENotificationType {
 }
 
 export interface ISentNotification {
-  id: string;
+  id: number;
   createdAt: string;
   seen: boolean;
   type: ENotificationType,
@@ -27,11 +27,11 @@ export interface INotificationCounts {
 export type TNotificationContentPayload = INotificationNewFollowerContentPayload | INotificationNewQuestionContentPayload;
 
 export interface INotificationNewFollowerContentPayload {
-  id: string;
+  id: number;
   user: ISentUser;
 }
 
 export interface INotificationNewQuestionContentPayload {
-  id: string;
+  id: number;
   question: ISentQuestion;
 }

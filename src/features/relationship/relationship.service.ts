@@ -165,7 +165,7 @@ export class RelationshipService {
 
   private async sendPushMessageForFollow(notification: Notification, follower: User, followed: User) {
     const pushMessagePayload: INotificationNewFollowerContentPayload = {
-      id: notification.id.toString(),
+      id: notification.id,
       user: await this.sendableService.getSendableUser(follower, {
         context: followed,
         withRelationships: true,
