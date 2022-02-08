@@ -9,6 +9,8 @@ import config from '../../shared/config/config';
 import { DayQuestion, TDayQuestionLanguage } from '../../database/entities/day.question.entity';
 import { DateTime } from 'luxon';
 import { SendableSharedService } from '../../shared/modules/sendable/sendable.shared.service';
+import { Question } from '../../database/entities/question.entity';
+import { v4 as uuid } from 'uuid';
 
 @Injectable()
 export class DayQuestionService {
@@ -18,7 +20,24 @@ export class DayQuestionService {
   ) {}
 
   async getQuestionOfTheDay(user: RequestUserManager, lang: TDayQuestionLanguage, date: Date) {
-    if (isNaN(date.getTime())) {
+    const dayQuestion = await this.getQuestionOfTheDayEntity(user, lang, date);
+    return await this.sendableService.getSendableQuestionFromDayQuestion(dayQuestion, { context: user.entity, lang });
+  }
+
+  async getQuestionEntityForQuestionOfTheDay(user: RequestUserManager, lang: TDayQuestionLanguage, dayQuestionId: number) {
+    const dayQuestion = await this.getQuestionOfTheDayEntity(user, lang, dayQuestionId);
+
+    return this.db.getRepository(Question).create({
+      content: dayQuestion.content[lang],
+      seen: true,
+      conversationId: uuid(),
+      questionOfTheDayId: dayQuestion.id,
+      receiverId: user.id,
+    });
+  }
+
+  private async getQuestionOfTheDayEntity(user: RequestUserManager, lang: TDayQuestionLanguage, dateOrId: Date | number) {
+    if (dateOrId instanceof Date && isNaN(dateOrId.getTime())) {
       throw ErrorService.throw(EApiError.InvalidParameter);
     }
 
@@ -26,31 +45,41 @@ export class DayQuestionService {
       throw ErrorService.throw(EApiError.UnsupportedLanguage);
     }
 
-    const dayQuestion = await this.getInternalQuestionOfTheDay(date);
+    const dayQuestion = await this.getInternalQuestionOfTheDay(dateOrId);
     if (!dayQuestion) {
       throw ErrorService.throw(EApiError.ServerError);
     }
 
-    return await this.sendableService.getSendableQuestionFromDayQuestion(dayQuestion, { context: user.entity, lang });
+    // Check if user has already replied to this day question
+    const hasRepliedCount = await this.db.getRepository(Question)
+      .count({ where: { receiverId: user.id, questionOfTheDayId: dayQuestion.id } });
+
+    if (hasRepliedCount > 0) {
+      throw ErrorService.throw(EApiError.AlreadyAnswered);
+    }
+
+    return dayQuestion;
   }
 
-  private async getInternalQuestionOfTheDay(date: Date) {
+  private async getInternalQuestionOfTheDay(dateOrId: Date | number) {
     const dayQuestionQb = this.db.getRepository(DayQuestion)
       .createQueryBuilder('dayq')
       .select(['dayq.id', 'dayq.content'])
       .where('dayq.hidden = FALSE');
 
-    if (config.DAY_QUESTIONS.FORCED_CURRENT) {
+    if (typeof dateOrId === 'number') {
+      dayQuestionQb.andWhere('dayq.id = :forcedId', { forcedId: dateOrId });
+    } else if (config.DAY_QUESTIONS.FORCED_CURRENT) {
       dayQuestionQb.andWhere('dayq.id = :forcedId', { forcedId: config.DAY_QUESTIONS.FORCED_CURRENT });
     }
 
     const dayQuestions = await dayQuestionQb.getMany();
 
-    if (dayQuestions.length <= 1) {
+    if (dayQuestions.length <= 1 || typeof dateOrId === 'number') {
       return dayQuestions[0];
     }
 
-    const dayAsString = DateTime.fromJSDate(date).toFormat('dd/MM/yyyy');
+    const dayAsString = DateTime.fromJSDate(dateOrId).toFormat('dd/MM/yyyy');
     const idGenerator = RandomSeed.create(dayAsString);
     const dayQuestionIndex = idGenerator.range(dayQuestions.length);
 

@@ -43,7 +43,7 @@ export class MediaCleaningQueueConsumer {
       const fullPath = path.resolve(config.UPLOAD.TEMPORARY, filename);
       const stat = await fs.promises.stat(fullPath);
 
-      if (stat.mtimeMs + expirationDelay < Date.now()) {
+      if (stat.ctimeMs + expirationDelay < Date.now()) {
         Logger.log(`Cron: Deleting temporary file ${filename}`);
         fs.promises.unlink(fullPath).catch(emptyErrorFn);
       }
@@ -58,7 +58,7 @@ export class MediaCleaningQueueConsumer {
       const fullPath = path.resolve(config.UPLOAD.FILE_PROCESSING, filename);
       const stat = await fs.promises.stat(fullPath);
 
-      if (stat.mtimeMs + expirationDelay < Date.now()) {
+      if (stat.ctimeMs + expirationDelay < Date.now()) {
         Logger.log(`Cron: Deleting bungling convert file ${filename}`);
         fs.promises.unlink(fullPath).catch(emptyErrorFn);
       }
@@ -89,7 +89,7 @@ export class MediaCleaningQueueConsumer {
       const fullPath = path.resolve(config.UPLOAD.PROFILE_PICTURES, filename);
       const stat = await fs.promises.stat(fullPath);
 
-      if (stat.mtimeMs + expirationDelayTolerence < Date.now()) {
+      if (stat.ctimeMs + expirationDelayTolerence < Date.now()) {
         Logger.log(`Cron: Deleting unlinked profile picture file ${filename}`);
         fs.promises.unlink(fullPath).catch(emptyErrorFn);
       }
@@ -120,7 +120,7 @@ export class MediaCleaningQueueConsumer {
       const fullPath = path.resolve(config.UPLOAD.BANNERS, filename);
       const stat = await fs.promises.stat(fullPath);
 
-      if (stat.mtimeMs + expirationDelayTolerence < Date.now()) {
+      if (stat.ctimeMs + expirationDelayTolerence < Date.now()) {
         Logger.log(`Cron: Deleting unlinked banner picture file ${filename}`);
         fs.promises.unlink(fullPath).catch(emptyErrorFn);
       }
@@ -151,7 +151,7 @@ export class MediaCleaningQueueConsumer {
       const fullPath = path.resolve(config.UPLOAD.ANSWER_PICTURES, filename);
       const stat = await fs.promises.stat(fullPath);
 
-      if (stat.mtimeMs + expirationDelayTolerence < Date.now()) {
+      if (stat.ctimeMs + expirationDelayTolerence < Date.now()) {
         Logger.log(`Cron: Deleting unlinked answer picture file ${filename}`);
         fs.promises.unlink(fullPath).catch(emptyErrorFn);
       }

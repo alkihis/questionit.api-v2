@@ -76,6 +76,9 @@ export class User {
   @Column('bool', { name: 'allow_anonymous_questions', nullable: false, default: true })
   allowAnonymousQuestions: boolean;
 
+  @Column('bool', { name: 'use_rocket_emoji_in_questions', nullable: false, default: true })
+  useRocketEmojiInQuestions: boolean;
+
   @Column('bool', { name: 'safe_mode', nullable: false, default: true })
   safeMode: boolean;
 

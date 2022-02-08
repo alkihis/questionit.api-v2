@@ -27,6 +27,8 @@ const config = {
     NAME_REGEX: /^.{2,32}$/i,
     BLOCKED_WORDS_REGEX: /^[\p{L}\p{N}_. -]{2,32}$/iu,
     FILE_SIZE: 5 * 1024 * 1024,
+    ANSWER_PICTURE_FILE_SIZE: 2.5 * 1024 * 1024,
+    ANSWER_GIF_FILE_SIZE: 30 * 1024 * 1024,
     APP_REQUEST_TOKEN_EXPIRATION: 15 * 60 * 1000, // 15 minutes
     APPS_PER_USER: 5,
     MAX_NEW_LINES_IN_QUESTIONS: 12,

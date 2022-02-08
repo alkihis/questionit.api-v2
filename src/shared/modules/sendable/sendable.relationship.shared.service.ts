@@ -14,6 +14,16 @@ export class SendableRelationshipSharedService {
     @InjectConnection() private db: Connection,
   ) {}
 
+  async followingsOf(user: User) {
+    const relationships = await this.db.getRepository(Relationship)
+      .createQueryBuilder('relationship')
+      .where('relationship.fromUserId = :userId', { userId: user.id })
+      .select(['relationship.id', 'relationship.toUserId', 'relationship.fromUserId'])
+      .getMany();
+
+    return relationships.map(r => r.toUserId);
+  }
+
   async relationshipBetween(sourceUser: User, targetUser: User) {
     const relationships = await this.bulkRelationships(sourceUser, [targetUser]);
     return relationships[targetUser.id];

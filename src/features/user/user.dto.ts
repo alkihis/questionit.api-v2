@@ -70,4 +70,9 @@ export class EditUserDto {
   @IsBoolean()
   @Transform(BooleanTransformer)
   dropQuestionsOnBlockedWord?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  @Transform(BooleanTransformer)
+  useRocketEmojiInQuestions?: boolean;
 }

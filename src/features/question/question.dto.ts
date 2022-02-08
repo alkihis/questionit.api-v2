@@ -34,9 +34,6 @@ export class AnswerQuestionDto {
   @MaxLength(config.LIMITS.ANSWER_LENGTH)
   answer: string;
 
-  @IsInt()
-  questionId: number;
-
   @IsOptional()
   @IsBoolean()
   isQuestionOfTheDay?: boolean;
@@ -78,4 +75,25 @@ export class GetWaitingQuestionsDto extends PaginationWithIdsDto {
   @IsBoolean()
   @Transform(BooleanTransformer)
   markAsSeen?: boolean;
+}
+
+export class GetQuestionAncestorsDto {
+  @IsInt()
+  @IsOptional()
+  @Transform(NumberTransformer)
+  pageSize: number = 10;
+}
+
+export class GetQuestionRepliesDto extends PaginationWithIdsDto {
+  order = 'DESC' as const;
+
+  @Max(30)
+  pageSize: number = 10;
+}
+
+export class GetQuestionTimelineDto extends PaginationWithIdsDto {
+  order = 'DESC' as const;
+
+  @Max(50)
+  pageSize: number = 20;
 }

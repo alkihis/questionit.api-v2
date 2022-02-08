@@ -37,3 +37,9 @@ export interface ISentPoll {
   id: number;
   options: string[];
 }
+
+export interface ISentQuestionTree {
+  length: number;
+  question: ISentQuestion;
+  ancestors: ISentQuestion[];
+}

@@ -14,6 +14,7 @@ import { getUnaccentQuery } from '../../shared/utils/query.utils';
 import config from '../../shared/config/config';
 import { TwitterService } from '../../shared/modules/twitter/twitter.service';
 import { MediasService } from '../../shared/modules/medias/medias.service';
+import { updateEntityValuesIfDefined } from '../../shared/utils/entity.utils';
 
 export type TEditProfileFiles = { [K in 'avatar' | 'background']: Express.Multer.File[] };
 
@@ -115,33 +116,19 @@ export class UserService {
     if (files?.background?.length) {
       entity.bannerPicture = await this.convertSentBannerAndGetFilename(files.background[0]);
     }
-    if (typeof dto.name !== 'undefined') {
-      entity.name = dto.name;
-    }
-    if (typeof dto.slug !== 'undefined') {
-      entity.slug = dto.slug;
-    }
-    if (typeof dto.askMeMessage !== 'undefined') {
-      entity.askMeMessage = dto.askMeMessage;
-    }
-    if (typeof dto.allowAnonymousQuestions !== 'undefined') {
-      entity.allowAnonymousQuestions = dto.allowAnonymousQuestions;
-    }
-    if (typeof dto.sendQuestionsToTwitterByDefault !== 'undefined') {
-      entity.sendQuestionsToTwitterByDefault = dto.sendQuestionsToTwitterByDefault;
-    }
-    if (typeof dto.allowQuestionOfTheDay !== 'undefined') {
-      entity.allowQuestionOfTheDay = dto.allowQuestionOfTheDay;
-    }
-    if (typeof dto.safeMode !== 'undefined') {
-      entity.safeMode = dto.safeMode;
-    }
-    if (typeof dto.safeMode !== 'undefined') {
-      entity.visible = dto.visible;
-    }
-    if (typeof dto.dropQuestionsOnBlockedWord !== 'undefined') {
-      entity.dropQuestionsOnBlockedWord = dto.dropQuestionsOnBlockedWord;
-    }
+
+    updateEntityValuesIfDefined(entity, {
+      name: dto.name,
+      slug: dto.slug,
+      askMeMessage: dto.askMeMessage,
+      allowAnonymousQuestions: dto.allowAnonymousQuestions,
+      sendQuestionsToTwitterByDefault: dto.sendQuestionsToTwitterByDefault,
+      allowQuestionOfTheDay: dto.allowQuestionOfTheDay,
+      safeMode: dto.safeMode,
+      visible: dto.visible,
+      dropQuestionsOnBlockedWord: dto.dropQuestionsOnBlockedWord,
+      useRocketEmojiInQuestions: dto.useRocketEmojiInQuestions,
+    });
 
     entity.updatedAt = new Date();
 
@@ -152,7 +139,13 @@ export class UserService {
 
   private async convertSentProfilePictureAndGetFilename(file: Express.Multer.File) {
     try {
-      const { link } = await this.mediasService.getConvertedImageFile(file, config.UPLOAD.PROFILE_PICTURES, { fixed: [250, 250] });
+      const { link } = await this.mediasService.getConvertedImageFile({
+        file,
+        mimeTypeCheck: type => type.mime === 'image/jpeg' || type.mime === 'image/png',
+        fileSizeCheck: size => size <= config.LIMITS.FILE_SIZE,
+        destination: config.UPLOAD.PROFILE_PICTURES,
+        dimensions: { fixed: [250, 250] },
+      });
 
       // Picture is already moved at the right emplacement, do nothing else
       return link;
@@ -164,7 +157,13 @@ export class UserService {
 
   private async convertSentBannerAndGetFilename(file: Express.Multer.File) {
     try {
-      const { link } = await this.mediasService.getConvertedImageFile(file, config.UPLOAD.BANNERS, { fixed: [1500, 500] });
+      const { link } = await this.mediasService.getConvertedImageFile({
+        file,
+        mimeTypeCheck: type => type.mime === 'image/jpeg' || type.mime === 'image/png',
+        fileSizeCheck: size => size <= config.LIMITS.FILE_SIZE,
+        destination: config.UPLOAD.BANNERS,
+        dimensions: { fixed: [1500, 500] },
+      });
 
       // Picture is already moved at the right emplacement, do nothing else
       return link;

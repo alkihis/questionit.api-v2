@@ -11,6 +11,16 @@ export const updateEntityValues = <T>(entity: T, values: Partial<{ [K in keyof T
   return entity;
 };
 
+export const updateEntityValuesIfDefined = <T>(entity: T, values: Partial<{ [K in keyof T]: T[K] }>) => {
+  for (const key in values) {
+    if (typeof values[key] !== 'undefined') {
+      entity[key] = values[key];
+    }
+  }
+
+  return entity;
+};
+
 /**
  * Load a relation of an entity without having to manually setup the query builder.
  * Returns the relation value and register the relation into the entity automatically.

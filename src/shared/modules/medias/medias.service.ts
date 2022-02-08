@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { User } from '../../../database/entities/user.entity';
 import fs from 'fs';
 import config from '../../config/config';
-import fileType from 'file-type';
+import fileType, { FileTypeResult } from 'file-type';
 import { ErrorService } from '../errors/error.service';
 import { EApiError } from '../errors/error.enum';
 import { ImageConvertorManager } from '../../managers/image-convertor/image.convertor.manager';
@@ -10,20 +10,28 @@ import path from 'path';
 import { v4 as uuid } from 'uuid';
 import { TImageDimensions } from '../../managers/image-convertor/image.convertor.interface';
 
+export interface IConvertedImageFilePars {
+  file: Express.Multer.File;
+  mimeTypeCheck: (type: FileTypeResult) => boolean;
+  fileSizeCheck: (size: number, type: FileTypeResult) => boolean,
+  destination: string;
+  dimensions: TImageDimensions;
+}
+
 @Injectable()
 export class MediasService {
   /**
    * From a file, convert and crop, then save to disk at the right emplacement.
    * Returns filepath, destination, and filename to insert in user entity.
    */
-  async getConvertedImageFile(file: Express.Multer.File, destination: string, dimensions: TImageDimensions) {
+  async getConvertedImageFile({ file, mimeTypeCheck, fileSizeCheck, destination, dimensions }: IConvertedImageFilePars) {
     // Get mimetype
     const type = await fileType.fromFile(file.path);
 
-    if (!type || !type.mime.startsWith('image/')) {
+    if (!type || !mimeTypeCheck(type)) {
       throw ErrorService.throw(EApiError.InvalidSentFile);
     }
-    if (type.mime !== 'image/jpeg' && type.mime !== 'image/png') {
+    if (!fileSizeCheck(file.size, type)) {
       throw ErrorService.throw(EApiError.InvalidSentFile);
     }
 
@@ -45,6 +53,7 @@ export class MediasService {
       original: file.path,
       destination: destinationName,
       link: filename,
+      mimeType: type.mime,
     };
   }
 
