@@ -11,6 +11,8 @@ import { TDayQuestionLanguage } from '../../database/entities/day.question.entit
 import { JwtOrAnonymousAuthGuard } from '../../shared/guards/jwt.or.anonymous.auth.guard';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import config from '../../shared/config/config';
+import { RateLimit, RateLimitGuard } from '../../shared/guards/rate.limit.guard';
+import { Timing } from '../../shared/utils/time.utils';
 
 // TODO: Endpoint to list questions sent by a user to everyone? /question/sent
 
@@ -22,48 +24,55 @@ export class QuestionController {
   ) {}
 
   @Get('question/day/of/:lang')
-  @UseGuards(JwtAuthGuard, RightsGuard)
+  @UseGuards(JwtAuthGuard, RightsGuard, RateLimitGuard)
   @Right(EApplicationRight.InternalUseOnly)
+  @RateLimit(10, Timing.minutes(1))
   async getDayQuestion(@Req() req: Request, @Param('lang') lang: string, @Query(getValidationPipe()) query: GetQuestionOfTheDayDto) {
     return await this.dayQuestionService.getQuestionOfTheDay(req.user, lang as TDayQuestionLanguage, query.date);
   }
 
   @Post('question/anonymous')
-  @UseGuards(JwtOrAnonymousAuthGuard, RightsGuard)
+  @UseGuards(JwtOrAnonymousAuthGuard, RightsGuard, RateLimitGuard)
   @Right(EApplicationRight.SendQuestion)
+  @RateLimit(10, Timing.minutes(1))
   async sendQuestionAsAnonymous(@Req() req: Request, @Body(getValidationPipe()) body: MakeQuestionDto) {
     return await this.questionService.makeQuestion(req, body, true);
   }
 
   @Post('question')
-  @UseGuards(JwtAuthGuard, RightsGuard)
+  @UseGuards(JwtAuthGuard, RightsGuard, RateLimitGuard)
   @Right(EApplicationRight.SendQuestion)
+  @RateLimit(10, Timing.minutes(1))
   async sendQuestionAsLoggedUser(@Req() req: Request, @Body(getValidationPipe()) body: MakeQuestionDto) {
     return await this.questionService.makeQuestion(req, body, false);
   }
 
   @Get('question')
-  @UseGuards(JwtOrAnonymousAuthGuard)
+  @UseGuards(JwtOrAnonymousAuthGuard, RateLimitGuard)
+  @RateLimit(300, Timing.minutes(15))
   async listQuestionsReceivedByUser(@Req() req: Request, @Query(getValidationPipe()) query: GetQuestionOfUserDto) {
     return await this.questionService.listQuestionsReceivedByUser(req.user, query);
   }
 
   @Get('question/waiting')
-  @UseGuards(JwtAuthGuard, RightsGuard)
+  @UseGuards(JwtAuthGuard, RightsGuard, RateLimitGuard)
   @Right(EApplicationRight.ReadWaitingQuestions)
+  @RateLimit(300, Timing.minutes(15))
   async readAwaitingQuestionsOfUser(@Req() req: Request, @Query(getValidationPipe()) query: GetWaitingQuestionsDto) {
     return await this.questionService.listWaitingQuestions(req.user, query);
   }
 
   @Get('question/waiting/count')
-  @UseGuards(JwtAuthGuard, RightsGuard)
+  @UseGuards(JwtAuthGuard, RightsGuard, RateLimitGuard)
   @Right(EApplicationRight.ReadWaitingQuestions)
+  @RateLimit(900, Timing.minutes(15))
   async readAwaitingQuestionCountOfUser(@Req() req: Request) {
     return await this.questionService.getWaitingQuestionsCounts(req.user);
   }
 
   @Get('question/ancestors/:id')
-  @UseGuards(JwtOrAnonymousAuthGuard)
+  @UseGuards(JwtOrAnonymousAuthGuard, RateLimitGuard)
+  @RateLimit(180, Timing.minutes(15))
   async getQuestionAndAncestors(
     @Req() req: Request,
     @Param('id', ParseIntPipe) questionId: number,
@@ -73,7 +82,8 @@ export class QuestionController {
   }
 
   @Get('question/replies/:id')
-  @UseGuards(JwtOrAnonymousAuthGuard)
+  @UseGuards(JwtOrAnonymousAuthGuard, RateLimitGuard)
+  @RateLimit(180, Timing.minutes(15))
   async getRepliesOfQuestion(
     @Req() req: Request,
     @Param('id', ParseIntPipe) questionId: number,
@@ -83,15 +93,17 @@ export class QuestionController {
   }
 
   @Get('question/timeline')
-  @UseGuards(JwtAuthGuard, RightsGuard)
+  @UseGuards(JwtAuthGuard, RightsGuard, RateLimitGuard)
   @Right(EApplicationRight.ReadTimeline)
+  @RateLimit(180, Timing.minutes(15))
   async getQuestionTimelineOfUser(@Req() req: Request, @Query(getValidationPipe()) query: GetQuestionTimelineDto) {
     return await this.questionService.getQuestionTimelineOfUser(req.user, query);
   }
 
   @Post('question/:id/answer')
-  @UseGuards(JwtAuthGuard, RightsGuard)
+  @UseGuards(JwtAuthGuard, RightsGuard, RateLimitGuard)
   @Right(EApplicationRight.AnswerQuestion)
+  @RateLimit(10, Timing.minutes(1))
   @UseInterceptors(FileFieldsInterceptor([
     { name: 'picture', maxCount: 1 },
   ], {
@@ -115,32 +127,34 @@ export class QuestionController {
   }
 
   @Delete('question/:id')
-  @UseGuards(JwtAuthGuard, RightsGuard)
+  @UseGuards(JwtAuthGuard, RightsGuard, RateLimitGuard)
   @Right(EApplicationRight.DeleteQuestion)
+  @RateLimit(180, Timing.minutes(15))
   async deleteQuestionById(@Req() req: Request, @Param('id', ParseIntPipe) questionId: number) {
     return await this.questionService.deleteQuestion(req.user, questionId);
   }
 
   @Delete('question/waiting/blocked')
-  @UseGuards(JwtAuthGuard, RightsGuard)
+  @UseGuards(JwtAuthGuard, RightsGuard, RateLimitGuard)
   @Right(EApplicationRight.DeleteQuestion)
+  @RateLimit(5, Timing.minutes(1))
   async deleteQuestionsWithBlockedWords(@Req() req: Request) {
     return await this.questionService.deleteAllPendingMutedQuestions(req.user);
   }
 
   @Patch('question/pin/:id')
-  @UseGuards(JwtAuthGuard, RightsGuard)
+  @UseGuards(JwtAuthGuard, RightsGuard, RateLimitGuard)
   @Right(EApplicationRight.PinQuestions)
+  @RateLimit(30, Timing.minutes(15))
   async pinQuestionToProfile(@Req() req: Request, @Param('id', ParseIntPipe) questionId: number) {
     return await this.questionService.pinQuestionToProfile(req.user, questionId);
   }
 
   @Delete('question/pin')
-  @UseGuards(JwtAuthGuard, RightsGuard)
+  @UseGuards(JwtAuthGuard, RightsGuard, RateLimitGuard)
   @Right(EApplicationRight.PinQuestions)
+  @RateLimit(30, Timing.minutes(15))
   async unpinQuestionOfProfile(@Req() req: Request) {
     return await this.questionService.unpinQuestionOfProfile(req.user);
   }
-
-  // TODO: DELETE question/muted => ? (useful?)
 }

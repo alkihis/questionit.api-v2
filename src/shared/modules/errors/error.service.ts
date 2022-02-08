@@ -1,6 +1,7 @@
 import { EApiError } from './error.enum';
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { HttpException, HttpStatus, Logger } from '@nestjs/common';
 import config from '../../config/config';
+import { EntityNotFoundError } from 'typeorm';
 
 type TErrorObject = {
   [K in EApiError]: [number, string];
@@ -96,7 +97,10 @@ export class ErrorService {
       if (typeof error === 'function') {
         error(e);
       } else {
-        throw ErrorService.throw(e);
+        if (!(e instanceof EntityNotFoundError)) {
+          Logger.error(`Error catched and returned as HTTP exception ${error}:`, e);
+        }
+        throw ErrorService.throw(error);
       }
     }
   }
