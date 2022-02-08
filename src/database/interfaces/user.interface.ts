@@ -22,6 +22,7 @@ export interface ISentUser {
   allowQuestionOfTheDay?: boolean | null;
   dropQuestionsOnBlockedWord?: boolean;
   safeMode?: boolean;
+  useRocketEmojiInQuestions?: boolean;
 }
 
 export interface ISentUserCounts {

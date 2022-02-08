@@ -289,6 +289,7 @@ export class SendableSharedService {
         sentUser.allowQuestionOfTheDay = user.allowQuestionOfTheDay;
         sentUser.dropQuestionsOnBlockedWord = user.dropQuestionsOnBlockedWord;
         sentUser.safeMode = user.safeMode;
+        sentUser.useRocketEmojiInQuestions = user.useRocketEmojiInQuestions;
       }
 
       sentUsers.push(sentUser);
