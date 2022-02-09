@@ -47,7 +47,7 @@ export class QuestionController {
     return await this.questionService.makeQuestion(req, body, false);
   }
 
-  @Get('question')
+  @Get('question/answer/user')
   @UseGuards(JwtOrAnonymousAuthGuard, RateLimitGuard)
   @RateLimit(300, Timing.minutes(15))
   async listQuestionsReceivedByUser(@Req() req: Request, @Query(getValidationPipe()) query: GetQuestionOfUserDto) {
@@ -92,7 +92,7 @@ export class QuestionController {
     return await this.questionService.getRepliesOfQuestion(req.user, questionId, query);
   }
 
-  @Get('question/timeline')
+  @Get('question/answer/timeline')
   @UseGuards(JwtAuthGuard, RightsGuard, RateLimitGuard)
   @Right(EApplicationRight.ReadTimeline)
   @RateLimit(180, Timing.minutes(15))

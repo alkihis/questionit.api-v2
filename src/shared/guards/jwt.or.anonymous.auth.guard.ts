@@ -1,7 +1,8 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { IErrorContent } from '../modules/errors/error.service';
 import { EApiError } from '../modules/errors/error.enum';
+import { RequestUserManager } from '../managers/request.user.manager';
 
 @Injectable()
 export class JwtOrAnonymousAuthGuard extends AuthGuard('jwt') {
@@ -15,7 +16,12 @@ export class JwtOrAnonymousAuthGuard extends AuthGuard('jwt') {
       if (content.code === EApiError.BannedUser) {
         throw err;
       }
+
+      return null;
+    } else if (user instanceof RequestUserManager) {
+      return user as any;
     }
-    return user;
+
+    return null;
   }
 }

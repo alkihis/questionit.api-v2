@@ -7,7 +7,7 @@ import { EApiError } from '../errors/error.enum';
 import { TwitterApi } from 'twitter-api-v2';
 import config from '../../config/config';
 import { v4 as uuid } from 'uuid';
-import fs, { createWriteStream } from 'fs';
+import { createWriteStream } from 'fs';
 import * as https from 'https';
 import { MediasService } from '../medias/medias.service';
 

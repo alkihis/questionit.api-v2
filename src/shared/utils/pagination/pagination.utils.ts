@@ -11,8 +11,8 @@ export interface IPaginatedResult<T> {
 
 export interface IPaginatedWithIdsResult<T> {
   items: T[];
-  nextSinceId?: string;
-  nextUntilId?: string;
+  nextSinceId?: number;
+  nextUntilId?: number;
 }
 
 export interface IPaginateWithIdsParams<T extends { id: number }, R = T> {
@@ -73,16 +73,14 @@ export async function paginateWithIds<T extends { id: number }, R = T>({ qb, pag
 
   if (items.length === paginationDto.pageSize) {
     // There is elements before
-    const lowestId = items.reduce((prev, cur) => prev < cur.id ? prev : cur.id, items[0].id);
-    result.nextUntilId = lowestId.toString();
+    result.nextUntilId = items.reduce((prev, cur) => prev < cur.id ? prev : cur.id, items[0].id);
   }
 
   if (items.length) {
     // There can be elements after
-    const highestId = items.reduce((prev, cur) => prev > cur.id ? prev : cur.id, items[0].id);
-    result.nextSinceId = highestId.toString();
+    result.nextSinceId = items.reduce((prev, cur) => prev > cur.id ? prev : cur.id, items[0].id);
   } else if (paginationDto.untilId) {
-    result.nextSinceId = paginationDto.untilId.toString();
+    result.nextSinceId = paginationDto.untilId;
   }
 
   return result;

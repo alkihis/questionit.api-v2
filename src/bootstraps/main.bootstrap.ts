@@ -14,6 +14,8 @@ export async function bootstrap() {
   createDirectoryTree(config.UPLOAD.FILE_PROCESSING);
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  app.enableCors();
   app.set('trust proxy', 1);
 
   app.useGlobalFilters(new ErrorFilter());

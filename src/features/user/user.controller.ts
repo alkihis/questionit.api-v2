@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Req, Res, UploadedFiles, UseGuards, UseInterceptors, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Req, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { TEditProfileFiles, UserService } from './user.service';
 import { JwtAuthGuard } from '../../shared/guards/jwt.auth.guard';
 import { Request } from 'express';
@@ -100,7 +100,7 @@ export class UserController {
   }))
   async editUser(
     @Req() req: Request,
-    @Body(new ValidationPipe({ transform: true })) body: EditUserDto,
+    @Body(getValidationPipe()) body: EditUserDto,
     @UploadedFiles() files: TEditProfileFiles,
   ) {
     return await this.userService.updateUserSettings(req.user, body, files);

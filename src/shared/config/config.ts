@@ -3,15 +3,15 @@ import * as path from 'path';
 const rootDir = path.resolve(__dirname, '..', '..', '..');
 
 const config = {
-  URL: process.env.API_URL || 'http://localhost:3001',
-  WEB_URL: process.env.WEB_URL || 'http://localhost:3000',
+  URL: process.env.QUESTIONIT_API_URL || 'http://localhost:5001',
+  WEB_URL: process.env.WEB_URL || 'http://localhost:5002',
   ROOT_DIR: rootDir,
   DB: {
     USER: process.env.DB_USER || 'questionit',
     PASSWORD: process.env.DB_PASSWORD || 'questionit',
     HOST: process.env.DB_HOST || 'postgres',
     DATABASE: process.env.DB_DATABASE || 'questionit',
-    LOGGING: false,
+    LOGGING: true,
   },
   JWT: {
     SECRET: process.env.APP_SECRET || 'questionit',
@@ -63,7 +63,7 @@ const config = {
     CONSUMER_SECRET: process.env.OAUTH_CONSUMER_SECRET,
     OAUTH_TOKEN: process.env.OAUTH_DEFAULT_TOKEN,
     OAUTH_SECRET: process.env.OAUTH_DEFAULT_SECRET,
-    CALLBACK_URL: process.env.TWITTER_CALLBACK_URL || 'http://localhost:3000/t_callback',
+    CALLBACK_URL: process.env.TWITTER_CALLBACK_URL || `${process.env.WEB_URL || 'http://localhost:5002'}/t_callback`,
   },
   UPLOAD: {
     PROFILE_PICTURES: path.resolve(rootDir, 'uploads', 'profile-pictures'),
