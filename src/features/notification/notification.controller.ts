@@ -17,7 +17,7 @@ export class NotificationController {
 
   @Get('notification')
   @UseGuards(JwtAuthGuard, RightsGuard, RateLimitGuard)
-  @Right(EApplicationRight.ReadNotification, EApplicationRight.ReadRelationship)
+  @Right(EApplicationRight.ReadNotification)
   @RateLimit(60, Timing.minutes(1))
   async listNotifications(@Req() req: Request, @Query(getValidationPipe()) query: ListNotificationDto) {
     return await this.notificationService.listNotifications(req.user, query);

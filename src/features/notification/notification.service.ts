@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/typeorm';
-import { Connection, In, IsNull } from 'typeorm';
+import { Connection, In } from 'typeorm';
 import { RequestUserManager } from '../../shared/managers/request.user.manager';
 import { ListNotificationDto } from './notification.dto';
 import { paginateWithIds } from '../../shared/utils/pagination/pagination.utils';
 import { Notification } from '../../database/entities/notification.entity';
 import { SendableSharedService } from '../../shared/modules/sendable/sendable.shared.service';
 import { EApplicationRight } from '../../database/enums/questionit.application.enum';
-import { INotificationCounts } from '../../database/interfaces/notification.interface';
+import { ENotificationType, INotificationCounts } from '../../database/interfaces/notification.interface';
 import { Question } from '../../database/entities/question.entity';
 
 @Injectable()
@@ -19,9 +19,7 @@ export class NotificationService {
 
   async listNotifications(user: RequestUserManager, query: ListNotificationDto) {
     const paginatedNotifications = await paginateWithIds({
-      qb: this.db.getRepository(Notification)
-        .createQueryBuilder('notification')
-        .where('notification.userId = :userId', { userId: user.id }),
+      qb: this.getNotificationOfUserQb(user),
       paginationDto: query,
       convertItems: items => this.sendableService.getSendableNotifications(items, { context: user.entity }),
     });
@@ -45,7 +43,7 @@ export class NotificationService {
   async getNotificationCounts(user: RequestUserManager) {
     const counts: INotificationCounts = {
       questions: 0,
-      notifications: await this.db.getRepository(Notification).count({ where: { userId: user.id } }),
+      notifications: await this.getNotificationOfUserQb(user).getCount(),
     };
 
     if (user.hasRight(EApplicationRight.ReadWaitingQuestions)) {
@@ -68,5 +66,21 @@ export class NotificationService {
 
       await this.db.getRepository(Notification).delete({ userId: user.id, id: numberId });
     }
+  }
+
+  private getNotificationOfUserQb(user: RequestUserManager) {
+    const availableTypes: ENotificationType[] = [ENotificationType.Answered];
+
+    if (user.hasRight(EApplicationRight.ReadRelationship)) {
+      availableTypes.push(ENotificationType.Follow, ENotificationType.FollowBack);
+    }
+    if (user.hasRight(EApplicationRight.ReadWaitingQuestions)) {
+      availableTypes.push(ENotificationType.Question);
+    }
+
+    return this.db.getRepository(Notification)
+      .createQueryBuilder('notification')
+      .where('notification.userId = :userId', { userId: user.id })
+      .andWhere('notification.type IN (:...availableTypes)', { availableTypes });
   }
 }
