@@ -218,7 +218,7 @@ export class QuestionService {
       this.db.getRepository(Poll)
         .createQueryBuilder('poll')
         .where('poll.questionId IS NULL')
-        .andWhere('poll.id = :pollId', { pollId: dto.pollId })
+        .andWhere('poll.id = :pollId', { pollId: dto.pollId || -1 })
         .getOneOrFail(),
       EApiError.TakenPoll,
     );
@@ -226,14 +226,9 @@ export class QuestionService {
 
   /** Question reading */
 
-  async listQuestionsReceivedByUser(user: RequestUserManager | undefined, dto: GetQuestionOfUserDto) {
-    const userId = dto.userId || user?.id;
-    if (!userId) {
-      throw ErrorService.throw(EApiError.MissingParameter);
-    }
-
+  async listQuestionsReceivedByUser(user: RequestUserManager | undefined, userId: number, dto: GetQuestionOfUserDto) {
     await ErrorService.fulfillOrHttpException(
-      this.db.getRepository(User).findOneOrFail({ where: { id: userId } }),
+      this.db.getRepository(User).findOneOrFail({ where: { id: userId || -1 } }),
       EApiError.UserNotFound,
     );
 

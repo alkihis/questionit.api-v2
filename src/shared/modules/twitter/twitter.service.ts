@@ -65,7 +65,7 @@ export class TwitterService {
         user.profilePicture = await this.saveFileFromUrl(config.UPLOAD.PROFILE_PICTURES, img);
       }
       if (banner) {
-        user.bannerPicture = await this.saveFileFromUrl(config.UPLOAD.BANNERS, img);
+        user.bannerPicture = await this.saveFileFromUrl(config.UPLOAD.BANNERS, banner);
       }
     } catch {
       // The tokens seems to be invalids...

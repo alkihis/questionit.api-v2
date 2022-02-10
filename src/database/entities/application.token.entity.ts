@@ -22,12 +22,12 @@ export class ApplicationToken {
   @Column('text', { name: 'validator', nullable: true })
   validator: string;
 
-  @Column('int', { name: 'owner_id', nullable: false })
+  @Column('int', { name: 'owner_id', nullable: true })
   ownerId: number;
 
   @ManyToOne(
     type => User,
-    { cascade: true, nullable: false, onDelete: 'CASCADE' },
+    { cascade: true, nullable: true, onDelete: 'CASCADE' },
   )
   @JoinColumn({ name: 'owner_id' })
   owner: User;

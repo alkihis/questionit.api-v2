@@ -10,7 +10,7 @@ import { ApproveAppDto, CreateApplicationDto, CreateAppTokenDto } from './applic
 import { QuestionItApplication } from '../../database/entities/questionit.application.entity';
 import crypto from 'crypto';
 import CryptoJS from 'crypto-js';
-import RandomJS from 'random-js';
+import { MersenneTwister19937, Random } from 'random-js';
 import urlSafeBase64 from 'urlsafe-base64';
 import { IRequestTokenData } from '../../database/interfaces/token.interface';
 import config from '../../shared/config/config';
@@ -30,7 +30,7 @@ export class ApplicationService {
       this.db.getRepository(ApplicationToken)
         .createQueryBuilder('apptoken')
         .where('apptoken.token = :token', { token })
-        .innerJoin('apptoken.application', 'app')
+        .innerJoinAndSelect('apptoken.application', 'app')
         .getOneOrFail(),
       EApiError.InvalidExpiredToken,
     );
@@ -196,7 +196,7 @@ export class ApplicationService {
     }
 
     // Generate a pin
-    const generator = new RandomJS.Random(RandomJS.MersenneTwister19937.autoSeed());
+    const generator = new Random(MersenneTwister19937.autoSeed());
     const pin = generator.integer(100000, 999999);
 
     applicationToken.validator = String(pin);
@@ -250,6 +250,6 @@ export class ApplicationService {
   }
 
   private getFreshTokenId() {
-    return urlSafeBase64.encode(crypto.randomBytes(16));
+    return urlSafeBase64.encode(crypto.randomBytes(32));
   }
 }

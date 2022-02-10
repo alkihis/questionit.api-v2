@@ -53,11 +53,6 @@ export class GetQuestionOfUserDto extends PaginationWithIdsDto {
 
   @Max(30)
   pageSize: number;
-
-  @IsInt()
-  @IsOptional()
-  @Transform(NumberTransformer)
-  userId: number;
 }
 
 export class GetWaitingQuestionsDto extends PaginationWithIdsDto {

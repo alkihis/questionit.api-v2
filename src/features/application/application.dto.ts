@@ -95,9 +95,9 @@ export class CreateApplicationDto {
   @Matches(config.LIMITS.NAME_REGEX)
   name: string;
 
-  @IsOptional()
   @IsUrl()
   @MaxLength(255)
+  @ValidateIf((_, value) => value)
   url: string;
 
   @IsObject()

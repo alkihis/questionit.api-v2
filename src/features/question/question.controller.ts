@@ -47,11 +47,14 @@ export class QuestionController {
     return await this.questionService.makeQuestion(req, body, false);
   }
 
-  @Get('question/answer/user')
+  @Get('question/answer/user/:id')
   @UseGuards(JwtOrAnonymousAuthGuard, RateLimitGuard)
   @RateLimit(300, Timing.minutes(15))
-  async listQuestionsReceivedByUser(@Req() req: Request, @Query(getValidationPipe()) query: GetQuestionOfUserDto) {
-    return await this.questionService.listQuestionsReceivedByUser(req.user, query);
+  async listQuestionsReceivedByUser(
+    @Req() req: Request,
+    @Param('id', ParseIntPipe) userId: number,
+    @Query(getValidationPipe()) query: GetQuestionOfUserDto) {
+    return await this.questionService.listQuestionsReceivedByUser(req.user, userId, query);
   }
 
   @Get('question/waiting')
