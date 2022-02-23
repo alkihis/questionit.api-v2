@@ -43,7 +43,9 @@ export class NotificationService {
   async getNotificationCounts(user: RequestUserManager) {
     const counts: INotificationCounts = {
       questions: 0,
-      notifications: await this.getNotificationOfUserQb(user).getCount(),
+      notifications: await this.getNotificationOfUserQb(user)
+        .andWhere('notification.seen = FALSE')
+        .getCount(),
     };
 
     if (user.hasRight(EApplicationRight.ReadWaitingQuestions)) {
