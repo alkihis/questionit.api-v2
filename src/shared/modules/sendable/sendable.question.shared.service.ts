@@ -70,7 +70,7 @@ export class SendableQuestionSharedService {
 
         if (answer.linkedImage) {
           preloadedAnswers[questionId].attachment = {
-            type: answer.linkedImage.endsWith('.gif') ? 'gif' : 'image',
+            type: answer.linkedImage.endsWith('.mp4') ? 'gif' : 'image',
             url: this.mediasService.getImagePublicUrl(answer.linkedImage, EImageType.Answer),
           };
         }

@@ -42,7 +42,8 @@ export class MediasService {
       throw ErrorService.throw(EApiError.InvalidSentFile);
     }
 
-    const filename = uuid() + '.' + type.ext;
+    const destPath = path.parse(onEnd.path);
+    const filename = uuid() + (destPath.ext || ('.' + type.ext));
     const destinationName = destination + '/' + filename;
 
     // Move to destination

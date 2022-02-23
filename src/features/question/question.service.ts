@@ -28,7 +28,6 @@ import { DayQuestionService } from './day.question.service';
 import { MediasService } from '../../shared/modules/medias/medias.service';
 import { FormatterQuestionService } from './formatter.question.service';
 import { TwitterService } from '../../shared/modules/twitter/twitter.service';
-import { SendTweetV1Params, TwitterApi } from 'twitter-api-v2';
 
 interface ICreateQuestionFromDtoArgs {
   user: RequestUserManager | undefined;
