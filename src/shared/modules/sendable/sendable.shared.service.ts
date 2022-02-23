@@ -280,7 +280,7 @@ export class SendableSharedService {
         sentUser.dropQuestionsOnBlockedWord = user.dropQuestionsOnBlockedWord;
         sentUser.safeMode = user.safeMode;
         sentUser.useRocketEmojiInQuestions = user.useRocketEmojiInQuestions;
-        sentUser.useHashtagInQuestions = user.useHashtagInQuestions;
+        sentUser.useHashtagInQuestions = user.useHashtagInQuestions ?? '';
       }
 
       sentUsers.push(sentUser);

@@ -129,7 +129,7 @@ export class UserService {
       visible: dto.visible,
       dropQuestionsOnBlockedWord: dto.dropQuestionsOnBlockedWord,
       useRocketEmojiInQuestions: dto.useRocketEmojiInQuestions,
-      useHashtagInQuestions: dto.useHashtagInQuestions,
+      useHashtagInQuestions: dto.useHashtagInQuestions || null,
     });
 
     entity.updatedAt = new Date();
