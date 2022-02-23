@@ -75,4 +75,10 @@ export class EditUserDto {
   @IsBoolean()
   @Transform(BooleanTransformer)
   useRocketEmojiInQuestions?: boolean;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(16)
+  @Matches(/^([A-Z_-]+[A-Z0-9_-]*)?$/ig)
+  useHashtagInQuestions?: string;
 }

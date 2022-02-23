@@ -52,6 +52,9 @@ export class User {
   @Column('text', { name: 'ask_me_message', default: 'Ask me something!' })
   askMeMessage: string;
 
+  @Column('text', { name: 'use_hashtag_in_questions', nullable: true, default: null })
+  useHashtagInQuestions: string;
+
   @Column('bool', { name: 'send_questions_to_twitter_by_default', default: true })
   sendQuestionsToTwitterByDefault: boolean;
 

@@ -59,7 +59,8 @@ export class UserService {
       paginationDto: query,
       qb: this.db.getRepository(User)
         .createQueryBuilder('user')
-        .where(`(${getUnaccentQuery('user.slug')} OR ${getUnaccentQuery('user.name')})`, { query: query.q }),
+        .where(`(${getUnaccentQuery('user.slug')} OR ${getUnaccentQuery('user.name')})`, { query: query.q })
+        .andWhere('user.visible = TRUE'),
       convertItems: items => this.sendableService.getSendableUsers(items, {
         context: user?.entity,
         withCounts: true,
@@ -128,6 +129,7 @@ export class UserService {
       visible: dto.visible,
       dropQuestionsOnBlockedWord: dto.dropQuestionsOnBlockedWord,
       useRocketEmojiInQuestions: dto.useRocketEmojiInQuestions,
+      useHashtagInQuestions: dto.useHashtagInQuestions,
     });
 
     entity.updatedAt = new Date();

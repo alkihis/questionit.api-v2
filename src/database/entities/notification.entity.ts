@@ -2,7 +2,7 @@ import { Entity, Column, ManyToOne, PrimaryGeneratedColumn, JoinColumn } from 't
 import { User } from './user.entity';
 import type { ENotificationType } from '../interfaces/notification.interface';
 
-@Entity()
+@Entity('notification', { schema: 'public' })
 export class Notification {
   @PrimaryGeneratedColumn({ name: 'id' })
   id: number;

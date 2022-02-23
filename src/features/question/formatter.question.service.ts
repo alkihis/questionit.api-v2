@@ -33,7 +33,12 @@ export class FormatterQuestionService {
       answerText = ('📊 ' + answerText).trimEnd();
     }
 
-    const [contentBoundary, answerBoundary] = this.findBestMaximumsForQuestionAndAnswerContent(question.content.length, answerText.length);
+    const answerHashtag = receiver.useHashtagInQuestions ? `#${receiver.useHashtagInQuestions}` : '';
+    const [contentBoundary, answerBoundary] = this.findBestMaximumsForQuestionAndAnswerContent(
+      question.content.length,
+      answerText.length,
+      answerHashtag ? (220 - answerHashtag.length - 2) : 220,
+    );
     let content = question.content.slice(0, contentBoundary);
     let answer = answerText.slice(0, answerBoundary);
 
@@ -50,7 +55,7 @@ export class FormatterQuestionService {
 
     const url = config.WEB_URL + '/u/' + receiver.slug + '/' + question.id;
 
-    const final = text.trim() + ' ' + url;
+    const final = `${text.trim()}${answerHashtag ? ` ${answerHashtag}` : ''} ${url}`;
     const topPadder = receiver.useRocketEmojiInQuestions ? '🚀 ' : '';
 
     if (final.length + topPadder.length <= 280) {
@@ -59,9 +64,7 @@ export class FormatterQuestionService {
     return final;
   }
 
-  protected findBestMaximumsForQuestionAndAnswerContent(contentLength: number, answerLength: number) {
-    const maximumLength = 220;
-
+  protected findBestMaximumsForQuestionAndAnswerContent(contentLength: number, answerLength: number, maximumLength = 220) {
     // if we don't exceed maximum
     if (contentLength + answerLength <= maximumLength) {
       return [contentLength, answerLength];

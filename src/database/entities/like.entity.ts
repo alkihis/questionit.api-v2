@@ -2,7 +2,7 @@ import { Entity, Column, ManyToOne, PrimaryGeneratedColumn, JoinColumn } from 't
 import { User } from './user.entity';
 import { Answer } from './answer.entity';
 
-@Entity()
+@Entity('like', { schema: 'public' })
 export class Like {
   @PrimaryGeneratedColumn({ name: 'id' })
   id: number;

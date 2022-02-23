@@ -173,15 +173,12 @@ export class SendableSharedService {
     }
 
     // Preload: users, like/reply count, attachments (single request)
-    // 1) Attachments
-    const polls = await this.sendableQuestionService.preloadPolls(questions.map(q => q.id));
-    const answers = await this.sendableQuestionService.preloadAnswers(options.context, questions.map(q => q.id));
-
-    // 2) Users
-    const users = await this.preloadQuestionUsers(questions, options);
-
-    // 3) Counts
-    const repliesCounts = await this.sendableQuestionService.preloadQuestionsReplyCount(questions.map(q => q.id));
+    const [polls, answers, users, repliesCounts] = await Promise.all([
+      this.sendableQuestionService.preloadPolls(questions.map(q => q.id)),
+      this.sendableQuestionService.preloadAnswers(options.context, questions.map(q => q.id)),
+      this.preloadQuestionUsers(questions, options),
+      this.sendableQuestionService.preloadQuestionsReplyCount(questions.map(q => q.id)),
+    ] as const);
 
     const sentQuestions: ISentQuestion[] = [];
 
@@ -246,19 +243,11 @@ export class SendableSharedService {
     }
 
     // Preload questions, question/following/follower counts, relationship statuses
-    let preloadedRelationships: TPreloadedRelationships | undefined;
-    let preloadedCounts: TPreloadedUserCounts | undefined;
-    let preloadedQuestions: TPreloadedUserPinnedQuestions | undefined;
-
-    if (options.withCounts) {
-      preloadedCounts = await this.sendableUserService.preloadCountsForUsers(users);
-    }
-    if (options.withRelationships && options.context) {
-      preloadedRelationships = await this.sendableRelationshipService.bulkRelationships(options.context, users);
-    }
-    if (options.withPinnedQuestions) {
-      preloadedQuestions = await this.preloadPinnedQuestions(options.context, users);
-    }
+    const [preloadedCounts, preloadedRelationships, preloadedQuestions] = await Promise.all([
+      options.withCounts ? this.sendableUserService.preloadCountsForUsers(users) : undefined,
+      options.withRelationships && options.context ? this.sendableRelationshipService.bulkRelationships(options.context, users) : undefined,
+      options.withPinnedQuestions ? this.preloadPinnedQuestions(options.context, users) : undefined,
+    ] as const);
 
     const sentUsers: ISentUser[] = [];
 
@@ -291,6 +280,7 @@ export class SendableSharedService {
         sentUser.dropQuestionsOnBlockedWord = user.dropQuestionsOnBlockedWord;
         sentUser.safeMode = user.safeMode;
         sentUser.useRocketEmojiInQuestions = user.useRocketEmojiInQuestions;
+        sentUser.useHashtagInQuestions = user.useHashtagInQuestions;
       }
 
       sentUsers.push(sentUser);
