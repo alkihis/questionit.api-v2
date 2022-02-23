@@ -549,14 +549,18 @@ export class QuestionService {
     await this.db.getRepository(Notification)
       .delete({ userId: user.id, relatedTo: question.id, type: ENotificationType.Question });
 
-    this.sendAnswerToTwitter({ user, question, linkedImage, originalFiles: files })
-      .catch(err => Logger.error(`Unable to sent tweet for question ${question.id}:`, err));
+    if (dto.postQuestionOnTwitter || (dto.postQuestionOnTwitter === undefined && user.entity.sendQuestionsToTwitterByDefault)) {
+      this.sendAnswerToTwitter({ user, question, linkedImage, originalFiles: files })
+        .catch(err => Logger.error(`Unable to send tweet for question ${question.id}:`, err));
+    }
 
     return await this.sendableService.getSendableQuestion(question, {
       context: user.entity,
       withUserRelationships: user.hasRight(EApplicationRight.ReadRelationship),
     });
   }
+
+  /** Utils */
 
   private async getConcernedQuestionForAnswer(user: RequestUserManager, questionId: number, dto: AnswerQuestionDto) {
     if (dto.isQuestionOfTheDay) {
@@ -679,7 +683,7 @@ export class QuestionService {
 
   private async tryToSendTwitterStatusFromTextAndParams(user: RequestUserManager, question: Question, mediaId?: string) {
     const client = this.twitterService.getClientForUser(user.entity);
-    const statusText = this.formatterQuestionService.getTwitterShareableTextOfQuestion(question, user.entity.useRocketEmojiInQuestions);
+    const statusText = this.formatterQuestionService.getTwitterShareableTextOfQuestion(question, user.entity);
 
     try {
       return await client.v1.tweet(statusText, {

@@ -3,6 +3,7 @@ import { InjectConnection } from '@nestjs/typeorm';
 import { Connection } from 'typeorm';
 import config from '../../shared/config/config';
 import { Question } from '../../database/entities/question.entity';
+import { User } from '../../database/entities/user.entity';
 
 @Injectable()
 export class FormatterQuestionService {
@@ -22,7 +23,7 @@ export class FormatterQuestionService {
       .trim();
   }
 
-  getTwitterShareableTextOfQuestion(question: Question, appendRocket: boolean) {
+  getTwitterShareableTextOfQuestion(question: Question, receiver: User) {
     let answerText = question.answer.content;
 
     if (answerText.length === 0 && question.answer.linkedImage) {
@@ -47,10 +48,10 @@ export class FormatterQuestionService {
 
     const text = content + ' – ' + answer;
 
-    const url = config.WEB_URL + '/u/' + question.receiver.slug + '/' + question.id;
+    const url = config.WEB_URL + '/u/' + receiver.slug + '/' + question.id;
 
     const final = text.trim() + ' ' + url;
-    const topPadder = appendRocket ? '🚀 ' : '';
+    const topPadder = receiver.useRocketEmojiInQuestions ? '🚀 ' : '';
 
     if (final.length + topPadder.length <= 280) {
       return topPadder + final;

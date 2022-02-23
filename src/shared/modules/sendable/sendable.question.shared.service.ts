@@ -7,13 +7,18 @@ import { Answer } from '../../../database/entities/answer.entity';
 import { ISentAnswer } from '../../../database/interfaces/question.interface';
 import { Like } from '../../../database/entities/like.entity';
 import { Poll } from '../../../database/entities/poll.entity';
+import { MediasService } from '../medias/medias.service';
+import { EImageType } from './sendable.shared.service';
 
 export type TPreloadedPollsOfQuestions = { [questionId: number]: Poll };
 export type TPreloadedAnswersOfQuestions = { [questionId: number]: ISentAnswer };
 
 @Injectable()
 export class SendableQuestionSharedService {
-  constructor(@InjectConnection() private db: Connection) {}
+  constructor(
+    @InjectConnection() private db: Connection,
+    private mediasService: MediasService,
+  ) {}
 
   async preloadPolls(questionIds: number[]) {
     const polls = await this.db.getRepository(Poll)
@@ -62,6 +67,13 @@ export class SendableQuestionSharedService {
           liked: answersLiked.has(answer.id),
           likeCount: prefetchedLikes[answer.id] || 0,
         };
+
+        if (answer.linkedImage) {
+          preloadedAnswers[questionId].attachment = {
+            type: answer.linkedImage.endsWith('.gif') ? 'gif' : 'image',
+            url: this.mediasService.getImagePublicUrl(answer.linkedImage, EImageType.Answer),
+          };
+        }
       } else {
         preloadedAnswers[questionId] = null;
       }
@@ -93,8 +105,7 @@ export class SendableQuestionSharedService {
     const likes = await this.db.getRepository(Like)
       .createQueryBuilder('qlike')
       .where('qlike.answerId IN (:...answerIds)', { answerIds: answers.map(a => a.id) })
-      .andWhere('qlike.ownerId = :userId', { userId: user.id })
-      .select('qlike.id')
+      .andWhere('qlike.emitterId = :userId', { userId: user.id })
       .getMany();
 
     return new Set(likes.map(l => l.answerId));

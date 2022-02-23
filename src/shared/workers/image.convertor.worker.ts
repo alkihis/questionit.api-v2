@@ -81,7 +81,7 @@ async function convert(path: string, dimensions: TImageDimensions, mime: string)
     image = image.cover(x, y); // resize and cover
   }
   // Keep dimensions, but verify if scale is valid
-  else if ('could_resize' in dimensions) {
+  else if ('couldResize' in dimensions) {
     const width = image.getWidth();
     const height = image.getHeight();
 

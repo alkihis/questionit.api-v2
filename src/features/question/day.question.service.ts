@@ -51,11 +51,11 @@ export class DayQuestionService {
     }
 
     // Check if user has already replied to this day question
-    const hasRepliedCount = await this.db.getRepository(Question)
-      .count({ where: { receiverId: user.id, questionOfTheDayId: dayQuestion.id } });
+    const hasReplied = await this.db.getRepository(Question)
+      .findOne({ where: { receiverId: user.id, questionOfTheDayId: dayQuestion.id } });
 
-    if (hasRepliedCount > 0) {
-      throw ErrorService.throw(EApiError.AlreadyAnswered);
+    if (hasReplied) {
+      throw ErrorService.throw(EApiError.AlreadyAnswered, { questionId: hasReplied.id });
     }
 
     return dayQuestion;

@@ -9,6 +9,7 @@ import { ImageConvertorManager } from '../../managers/image-convertor/image.conv
 import path from 'path';
 import { v4 as uuid } from 'uuid';
 import { TImageDimensions } from '../../managers/image-convertor/image.convertor.interface';
+import { EImageType } from '../sendable/sendable.shared.service';
 
 export interface IConvertedImageFilePars {
   file: Express.Multer.File;
@@ -41,8 +42,7 @@ export class MediasService {
       throw ErrorService.throw(EApiError.InvalidSentFile);
     }
 
-    const parsedPath = path.parse(onEnd.path);
-    const filename = uuid() + parsedPath.ext;
+    const filename = uuid() + '.' + type.ext;
     const destinationName = destination + '/' + filename;
 
     // Move to destination
@@ -67,5 +67,20 @@ export class MediasService {
     if (user.bannerPicture) {
       await fs.promises.unlink(config.UPLOAD.BANNERS + '/' + user.bannerPicture).catch(() => void 0);
     }
+  }
+
+  getImagePublicUrl(url: string | undefined, type: EImageType) {
+    if (!url) {
+      return null;
+    }
+
+    if (type === EImageType.Profile) {
+      return config.URL + '/user/profile/' + url;
+    } else if (type === EImageType.Banner) {
+      return config.URL + '/user/banner/' + url;
+    } else if (type === EImageType.Answer) {
+      return config.URL + '/question/answer/media/' + url;
+    }
+    return null;
   }
 }

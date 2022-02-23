@@ -36,6 +36,7 @@ export class AnswerQuestionDto {
 
   @IsOptional()
   @IsBoolean()
+  @Transform(BooleanTransformer)
   isQuestionOfTheDay?: boolean;
 
   @IsOptional()
@@ -45,6 +46,7 @@ export class AnswerQuestionDto {
 
   @IsOptional()
   @IsBoolean()
+  @Transform(BooleanTransformer)
   postQuestionOnTwitter?: boolean;
 }
 

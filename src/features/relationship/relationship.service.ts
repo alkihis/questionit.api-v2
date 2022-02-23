@@ -50,6 +50,7 @@ export class RelationshipService {
       qb: this.db.getRepository(User)
         .createQueryBuilder('user')
         .innerJoin(Relationship, 'relationship', 'relationship.fromUserId = user.id')
+        .addSelect('relationship.createdAt')
         .where('relationship.toUserId = :targetUserId', { targetUserId })
         .orderBy('relationship.createdAt', 'DESC'),
       paginationDto: pagination,
@@ -68,6 +69,7 @@ export class RelationshipService {
       qb: this.db.getRepository(User)
         .createQueryBuilder('user')
         .innerJoin(Relationship, 'relationship', 'relationship.toUserId = user.id')
+        .addSelect('relationship.createdAt')
         .where('relationship.fromUserId = :targetUserId', { targetUserId })
         .orderBy('relationship.createdAt', 'DESC'),
       paginationDto: pagination,

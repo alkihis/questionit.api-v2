@@ -5,7 +5,6 @@ import { User } from '../../../database/entities/user.entity';
 import { Question } from '../../../database/entities/question.entity';
 import { ISentUser } from '../../../database/interfaces/user.interface';
 import { ISentQuestion } from '../../../database/interfaces/question.interface';
-import config from '../../config/config';
 import { SendableQuestionSharedService } from './sendable.question.shared.service';
 import { SendableUserSharedService, TPreloadedUserCounts } from './sendable.user.shared.service';
 import { Token } from '../../../database/entities/token.entity';
@@ -17,6 +16,7 @@ import { QuestionItApplication } from '../../../database/entities/questionit.app
 import { getRightsAsObject } from '../../utils/rights.utils';
 import { ISentApplication } from '../../../database/interfaces/questionit.application.interface';
 import { DayQuestion, TDayQuestionLanguage } from '../../../database/entities/day.question.entity';
+import { MediasService } from '../medias/medias.service';
 
 type TPreloadedUserPinnedQuestions = { [userId: number]: ISentQuestion };
 
@@ -55,6 +55,7 @@ export class SendableSharedService {
     private sendableQuestionService: SendableQuestionSharedService,
     private sendableUserService: SendableUserSharedService,
     private sendableRelationshipService: SendableRelationshipSharedService,
+    private mediasService: MediasService,
   ) {}
 
   /* Tokens */
@@ -187,8 +188,8 @@ export class SendableSharedService {
     for (const question of questions) {
       const sentQuestion: ISentQuestion = {
         id: question.id,
-        owner: question.ownerId ? users[question.ownerId] : null,
-        receiver: users[question.receiverId],
+        owner: question.ownerId ? users.find(u => u.id === question.ownerId) : null,
+        receiver: users.find(u => u.id === question.receiverId),
         createdAt: question.createdAt.toISOString(),
         content: question.content,
         seen: options.context?.id === question.receiverId ? question.seen : null,
@@ -269,8 +270,8 @@ export class SendableSharedService {
         slug: user.slug,
         twitterId: user.twitterId,
         profileAskMeMessage: user.askMeMessage,
-        profilePictureUrl: this.processImageLink(user.profilePicture, EImageType.Profile),
-        bannerPictureUrl: this.processImageLink(user.bannerPicture, EImageType.Banner),
+        profilePictureUrl: this.mediasService.getImagePublicUrl(user.profilePicture, EImageType.Profile),
+        bannerPictureUrl: this.mediasService.getImagePublicUrl(user.bannerPicture, EImageType.Banner),
         allowAnonymousQuestions: user.allowAnonymousQuestions,
       };
 
@@ -351,22 +352,5 @@ export class SendableSharedService {
       rights: getRightsAsObject(Number(token.rights)),
       url: token.application.url,
     };
-  }
-
-  /* Assets */
-
-  private processImageLink(url: string | undefined, type: EImageType) {
-    if (!url) {
-      return null;
-    }
-
-    if (type === EImageType.Profile) {
-      return config.URL + '/user/profile/' + url;
-    } else if (type === EImageType.Banner) {
-      return config.URL + '/user/banner/' + url;
-    } else if (type === EImageType.Answer) {
-      return config.URL + '/question/answer/media/' + url;
-    }
-    return null;
   }
 }

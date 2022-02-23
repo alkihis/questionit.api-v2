@@ -129,14 +129,6 @@ export class QuestionController {
     });
   }
 
-  @Delete('question/:id')
-  @UseGuards(JwtAuthGuard, RightsGuard, RateLimitGuard)
-  @Right(EApplicationRight.DeleteQuestion)
-  @RateLimit(180, Timing.minutes(15))
-  async deleteQuestionById(@Req() req: Request, @Param('id', ParseIntPipe) questionId: number) {
-    return await this.questionService.deleteQuestion(req.user, questionId);
-  }
-
   @Delete('question/waiting/blocked')
   @UseGuards(JwtAuthGuard, RightsGuard, RateLimitGuard)
   @Right(EApplicationRight.DeleteQuestion)
@@ -159,5 +151,13 @@ export class QuestionController {
   @RateLimit(30, Timing.minutes(15))
   async unpinQuestionOfProfile(@Req() req: Request) {
     return await this.questionService.unpinQuestionOfProfile(req.user);
+  }
+
+  @Delete('question/:id')
+  @UseGuards(JwtAuthGuard, RightsGuard, RateLimitGuard)
+  @Right(EApplicationRight.DeleteQuestion)
+  @RateLimit(180, Timing.minutes(15))
+  async deleteQuestionById(@Req() req: Request, @Param('id', ParseIntPipe) questionId: number) {
+    return await this.questionService.deleteQuestion(req.user, questionId);
   }
 }

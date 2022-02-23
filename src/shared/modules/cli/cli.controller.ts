@@ -3,6 +3,19 @@ import { InjectConnection } from '@nestjs/typeorm';
 import { Connection, Like } from 'typeorm';
 import CliHelper, { CliListener } from 'interactive-cli-helper';
 import { User } from '../../../database/entities/user.entity';
+import { DayQuestion } from '../../../database/entities/day.question.entity';
+import config from '../../config/config';
+
+const helpMessage = CliHelper.formatHelp('QuestionIt.space server', {
+  commands: {
+    user: 'Manage registred users',
+    'day-question': 'Manage day questions',
+  },
+});
+
+const helper = new CliHelper({
+  onNoMatch: rest => rest ? helpMessage : 'Command not found.'
+});
 
 @Controller()
 export class CliModuleController {
@@ -15,9 +28,7 @@ export class CliModuleController {
   }
 
   private initCli() {
-    const helpMessage = CliHelper.formatHelp('QuestionIt.space server', { commands: {
-      user: 'Manage registred users',
-    } });
+
 
     const helper = new CliHelper({
       onNoMatch: rest => rest ? helpMessage : 'Command not found.'
@@ -30,6 +41,7 @@ export class CliModuleController {
 
     // --- DEFINE SUBCOMMANDS HERE ---
     helper.command('user', this.getUserCli());
+    helper.command('day-question', this.getDayQuestionCli());
     // --- SUBCOMMANDS END ---
 
     console.log('\nWelcome to QuestionIt API server CLI.');
@@ -123,6 +135,77 @@ export class CliModuleController {
 
       this.currentUserId = user.id;
       return `You now act on behalf of @${user.slug} (#${user.id})`;
+    });
+
+    return cli;
+  }
+
+  private getDayQuestionCli() {
+    const repository = this.db.getRepository(DayQuestion);
+
+    const cli = new CliListener(CliHelper.formatHelp(
+      'day-question', {
+        commands: {
+          lookup: 'Lookup available day questions',
+          delete: 'Delete a day question matching the exact ID',
+          get: 'Get a day question by ID',
+          'set-active': 'Force a day question to be set',
+          'remove-active': 'If any, remove the active day question',
+        },
+        description: 'Manage registered daily questions in QuestionIt.space\n',
+      }
+    ));
+
+    cli.command('lookup', rest => {
+      return repository.createQueryBuilder('q')
+        .where(`unaccent("q"."content"->>'fr') ILIKE '%' || unaccent(:rest) || '%'`, { rest })
+        .orWhere(`unaccent("q"."content"->>'en') ILIKE '%' || unaccent(:rest) || '%'`, { rest })
+        .take(10)
+        .getMany();
+    });
+
+    cli.command('delete', async rest => {
+      if (!rest) {
+        return 'Please specify a ID';
+      }
+
+      const dayQuestion = await repository.findOne({ where: { id: Number(rest) } });
+
+      if (!dayQuestion) {
+        return 'Day question not found';
+      }
+
+      await repository.delete({ id: dayQuestion.id });
+      return 'Day question deleted.';
+    });
+
+    cli.command('get', async rest => {
+      const results = await repository.findOne({ where: { id: Number(rest) } });
+
+      if (!results) {
+        return 'No results';
+      }
+
+      return results;
+    });
+
+    cli.command('set-active', async rest => {
+      const results = await repository.findOne({ where: { id: Number(rest) } });
+
+      if (!results) {
+        return 'Not found';
+      }
+
+      // TODO: Make this consistent in a multi-server setup
+      // @ts-ignore
+      config.DAY_QUESTIONS.FORCED_CURRENT = results.id;
+      return `Active day question is now #${results.id}`;
+    });
+
+    cli.command('remove-active', () => {
+      // @ts-ignore
+      config.DAY_QUESTIONS.FORCED_CURRENT = null;
+      return `No active day question`;
     });
 
     return cli;
