@@ -19,10 +19,10 @@ export class Poll {
   @Column('jsonb', { name: 'options', nullable: false })
   options: string[];
 
-  @Column('int', { name: 'owner_id', nullable: false })
+  @Column('int', { name: 'owner_id', nullable: true })
   ownerId: number;
 
-  @ManyToOne(type => User, { cascade: true, nullable: false, onDelete: 'CASCADE' })
+  @ManyToOne(type => User, { cascade: true, nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'owner_id' })
   owner: User;
 
