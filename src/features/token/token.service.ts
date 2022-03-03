@@ -24,6 +24,8 @@ import * as CryptoJS from 'crypto-js';
 import { IRequestTokenData } from '../../database/interfaces/token.interface';
 import { ERedisExpiration, ERedisPrefix, RedisService } from '../../shared/modules/redis/redis.service';
 import { isAppTokenExpired } from '../../shared/utils/application.token.utils';
+import { Timing } from '../../shared/utils/time.utils';
+import { DateTime } from 'luxon';
 
 @Injectable()
 export class TokenService {
@@ -33,6 +35,9 @@ export class TokenService {
     private readonly twitterService: TwitterService,
     private readonly sendableService: SendableSharedService,
   ) {}
+
+  private static readonly internalTokenExpiration = Timing.days(31);
+  private static readonly appTokenExpiration = Timing.hours(2);
 
   async getRequestToken() {
     const client = this.twitterService.getLoginClient();
@@ -73,7 +78,10 @@ export class TokenService {
     const jwtid = uuid();
 
     // Generate a JWT
-    const accessToken = await this.jwtService.signAsync({ userId: user.id.toString() } as IJwt, { jwtid });
+    const expiresIn = TokenService.internalTokenExpiration.asSeconds;
+    const expiresAt = DateTime.utc().plus({ second: expiresIn }).toJSDate();
+
+    const accessToken = await this.jwtService.signAsync({ userId: user.id.toString() } as IJwt, { jwtid, expiresIn });
 
     // Save the JWT in database
     const dbToken = this.db.getRepository(Token).create({
@@ -82,6 +90,7 @@ export class TokenService {
       openIp: req.ips?.join(',') || req.ip,
       lastLoginAt: new Date(),
       jti: jwtid,
+      expiresAt,
     });
 
     await this.db.getRepository(Token).save(dbToken);
@@ -132,12 +141,15 @@ export class TokenService {
     const jwtid = uuid();
 
     // Generate a JWT
+    const expiresIn = TokenService.appTokenExpiration.asSeconds;
+    const expiresAt = DateTime.utc().plus({ second: expiresIn }).toJSDate();
+
     const accessToken = await this.jwtService.signAsync({
       userId: appToken.ownerId.toString(),
       appId: appToken.applicationId.toString(),
       rights: tokenData.rights.toString(),
       appKey: application.key,
-    } as IJwt, { jwtid });
+    } as IJwt, { jwtid, expiresIn });
 
     // Save the JWT in database
     const entity = this.db.getRepository(Token).create({
@@ -147,6 +159,7 @@ export class TokenService {
       ownerId: appToken.ownerId,
       appId: appToken.applicationId,
       openIp: req.ips?.join(',') || req.ip,
+      expiresAt,
     });
 
     await this.db.getRepository(Token).save(entity);

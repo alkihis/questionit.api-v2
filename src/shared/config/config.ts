@@ -15,7 +15,6 @@ const config = {
   },
   JWT: {
     SECRET: process.env.APP_SECRET || 'questionit',
-    EXPIRATION: '52W',
   },
   LIMITS: {
     QUESTION_LENGTH: 500,
