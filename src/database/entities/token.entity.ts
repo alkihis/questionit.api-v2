@@ -29,6 +29,9 @@ export class Token {
   @Column('varchar', { name: 'last_ip', nullable: true, default: null, length: 255 })
   lastIp: string;
 
+  @Column('timestamptz', { name: 'expires_at', nullable: false, default: () => 'now()' })
+  expiresAt: Date;
+
   @Column('int', { name: 'owner_id', nullable: false })
   ownerId: number;
 

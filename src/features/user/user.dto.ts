@@ -79,6 +79,6 @@ export class EditUserDto {
   @IsOptional()
   @IsString()
   @MaxLength(16)
-  @Matches(/^([A-Z_-]+[A-Z0-9_-]*)?$/ig)
+  @Matches(/^([A-Z_-]+[A-Z0-9_-]*)?$/i)
   useHashtagInQuestions?: string;
 }
