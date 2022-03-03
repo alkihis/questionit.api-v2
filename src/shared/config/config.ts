@@ -19,6 +19,14 @@ const config = {
     DATABASE: process.env.DB_DATABASE || 'questionit',
     LOGGING: (process.env.NODE_ENV === 'development' ? ['query', 'error', 'schema', 'warn', 'info', 'log'] : ['error']) as LoggerOptions,
   },
+  MIGRATION: {
+    DB: {
+      USER: process.env.MIGRATION_DB_USER || 'questionit',
+      PASSWORD: process.env.MIGRATION_DB_PASSWORD || 'questionit',
+      HOST: process.env.MIGRATION_DB_HOST || 'mysql',
+      DATABASE: process.env.MIGRATION_DB_DATABASE || 'questionit',
+    },
+  },
   JWT: {
     SECRET: process.env.APP_SECRET || 'questionit',
   },
