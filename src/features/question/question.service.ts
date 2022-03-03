@@ -28,6 +28,7 @@ import { DayQuestionService } from './day.question.service';
 import { MediasService } from '../../shared/modules/medias/medias.service';
 import { FormatterQuestionService } from './formatter.question.service';
 import { TwitterService } from '../../shared/modules/twitter/twitter.service';
+import { RequestContextService } from '../../shared/modules/context/request.context.service';
 
 interface ICreateQuestionFromDtoArgs {
   user: RequestUserManager | undefined;
@@ -40,7 +41,6 @@ interface ICreateQuestionFromDtoArgs {
 export type TUploadAnswerPicture = { picture: Express.Multer.File[] };
 
 interface IAnswerToQuestionParams {
-  user: RequestUserManager;
   questionId: number;
   dto: AnswerQuestionDto;
   files: TUploadAnswerPicture;
@@ -67,13 +67,16 @@ export class QuestionService {
     private sendableRelationshipService: SendableRelationshipSharedService,
     private mediasService: MediasService,
     private twitterService: TwitterService,
+    private requestContextService: RequestContextService,
   ) {}
 
   /** Question creation */
 
-  async makeQuestion(request: Request, dto: MakeQuestionDto, asAnonymous: boolean) {
-    const user = request.user;
-    const emitterIp = request.ips?.[0] || request.ip;
+  async makeQuestion(dto: MakeQuestionDto, asAnonymous: boolean) {
+    const context = this.requestContextService;
+
+    const user = context.request.user;
+    const emitterIp = context.request.ips?.[0] || context.request.ip;
 
     const targetUser = await ErrorService.fulfillOrHttpException(
       this.db.getRepository(User)
@@ -225,7 +228,9 @@ export class QuestionService {
 
   /** Question reading */
 
-  async listQuestionsReceivedByUser(user: RequestUserManager | undefined, userId: number, dto: GetQuestionOfUserDto) {
+  async listQuestionsReceivedByUser(userId: number, dto: GetQuestionOfUserDto) {
+    const user = this.requestContextService.user;
+
     await ErrorService.fulfillOrHttpException(
       this.db.getRepository(User).findOneOrFail({ where: { id: userId || -1 } }),
       EApiError.UserNotFound,
@@ -244,7 +249,9 @@ export class QuestionService {
     });
   }
 
-  async listWaitingQuestions(user: RequestUserManager, dto: GetWaitingQuestionsDto) {
+  async listWaitingQuestions(dto: GetWaitingQuestionsDto) {
+    const user = this.requestContextService.user;
+
     return paginateWithIds({
       qb: this.db.getRepository(Question)
         .createQueryBuilder('question')
@@ -266,7 +273,8 @@ export class QuestionService {
     });
   }
 
-  async getWaitingQuestionsCounts(user: RequestUserManager) {
+  async getWaitingQuestionsCounts() {
+    const user = this.requestContextService.user;
     const questions = await this.db.getRepository(Question)
       .createQueryBuilder('question')
       .leftJoin('question.answer', 'answer')
@@ -294,7 +302,8 @@ export class QuestionService {
 
   /** Question ancestors reading */
 
-  async getQuestionAndAncestors(user: RequestUserManager | undefined, questionId: number, dto: GetQuestionAncestorsDto): Promise<ISentQuestionTree> {
+  async getQuestionAndAncestors(questionId: number, dto: GetQuestionAncestorsDto): Promise<ISentQuestionTree> {
+    const user = this.requestContextService.user;
     const question = await ErrorService.fulfillOrHttpException(
       this.db.getRepository(Question)
         .createQueryBuilder('question')
@@ -375,7 +384,9 @@ export class QuestionService {
 
   /** Question replies reading */
 
-  async getRepliesOfQuestion(user: RequestUserManager | undefined, questionId: number, dto: GetQuestionRepliesDto) {
+  async getRepliesOfQuestion(questionId: number, dto: GetQuestionRepliesDto) {
+    const user = this.requestContextService.user;
+
     return paginateWithIds({
       qb: this.db.getRepository(Answer)
         .createQueryBuilder('answer')
@@ -391,7 +402,8 @@ export class QuestionService {
 
   /** Question timeline reading */
 
-  async getQuestionTimelineOfUser(user: RequestUserManager, dto: GetQuestionTimelineDto) {
+  async getQuestionTimelineOfUser(dto: GetQuestionTimelineDto) {
+    const user = this.requestContextService.user;
     const followingsOfUser = await this.sendableRelationshipService.followingsOf(user.entity);
 
     return paginateWithIds({
@@ -409,7 +421,8 @@ export class QuestionService {
 
   /** Question pinning */
 
-  async pinQuestionToProfile(user: RequestUserManager, questionId: number) {
+  async pinQuestionToProfile(questionId: number) {
+    const user = this.requestContextService.user;
     const question = await ErrorService.fulfillOrHttpException(
       this.db.getRepository(Question)
         .createQueryBuilder('question')
@@ -432,7 +445,8 @@ export class QuestionService {
     });
   }
 
-  async unpinQuestionOfProfile(user: RequestUserManager) {
+  async unpinQuestionOfProfile() {
+    const user = this.requestContextService.user;
     user.entity.pinnedQuestionId = null;
     await this.db.getRepository(User).save(user.entity);
 
@@ -447,7 +461,8 @@ export class QuestionService {
 
   /** Question delete */
 
-  async deleteQuestion(user: RequestUserManager, questionId: number) {
+  async deleteQuestion(questionId: number) {
+    const user = this.requestContextService.user;
     const question = await ErrorService.fulfillOrHttpException(
       this.db.getRepository(Question)
         .createQueryBuilder('question')
@@ -468,7 +483,8 @@ export class QuestionService {
     await this.db.getRepository(Question).delete({ id: question.id });
   }
 
-  async deleteAllPendingMutedQuestions(user: RequestUserManager) {
+  async deleteAllPendingMutedQuestions() {
+    const user = this.requestContextService.user;
     const pendingQuestions = await this.db.getRepository(Question)
       .createQueryBuilder('question')
       .leftJoin('question.answer', 'answer')
@@ -514,7 +530,8 @@ export class QuestionService {
 
   /** Question delete */
 
-  async answerToQuestion({ user, questionId, dto, files }: IAnswerToQuestionParams) {
+  async answerToQuestion({ questionId, dto, files }: IAnswerToQuestionParams) {
+    const user = this.requestContextService.user;
     const question = await this.getConcernedQuestionForAnswer(user, questionId, dto);
 
     const answerText = this.getAnswerTextFromDto(question, dto, files);

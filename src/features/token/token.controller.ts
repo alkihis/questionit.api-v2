@@ -1,6 +1,5 @@
-import { Body, Controller, Delete, Get, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { TokenService } from './token.service';
-import { Request } from 'express';
 import { getValidationPipe } from '../../shared/pipes/validation.pipe.utils';
 import { CreateTokenDto, GetAccessTokenDto } from './token.dto';
 import { Right, RightsGuard } from '../../shared/guards/rights.guard';
@@ -18,11 +17,8 @@ export class TokenController {
   @Get('token/from-twitter/access')
   @UseGuards(RateLimitGuard)
   @RateLimit(30, Timing.minutes(15))
-  async twitterCallback(
-    @Req() req: Request,
-    @Query(getValidationPipe()) query: GetAccessTokenDto,
-  ) {
-    return await this.tokenService.loginFromTwitter(req, query);
+  async twitterCallback(@Query(getValidationPipe()) query: GetAccessTokenDto) {
+    return await this.tokenService.loginFromTwitter(query);
   }
 
   @Get('token/from-twitter/request')
@@ -38,31 +34,31 @@ export class TokenController {
   @Get('token/user')
   @UseGuards(JwtAuthGuard, RateLimitGuard)
   @RateLimit(75, Timing.minutes(15))
-  async verifyToken(@Req() req: Request) {
-    return await this.tokenService.checkUserTokensValidity(req.user);
+  async verifyToken() {
+    return await this.tokenService.checkUserTokensValidity();
   }
 
   @Post('token/create')
   @UseGuards(RateLimitGuard)
   @RateLimit(10, Timing.minutes(15))
-  async createTokenForApplication(@Req() req: Request, @Body() body: CreateTokenDto) {
-    return await this.tokenService.createTokenForApplication(req, body);
+  async createTokenForApplication(@Body() body: CreateTokenDto) {
+    return await this.tokenService.createTokenForApplication(body);
   }
 
   @Post('token/refresh')
   @UseGuards(RateLimitGuard)
   @Right(EApplicationRight.RefreshToken)
   @RateLimit(5, Timing.minutes(15))
-  async refreshToken(@Req() req: Request) {
-    return await this.tokenService.refreshToken(req, req.user);
+  async refreshToken() {
+    return await this.tokenService.refreshToken();
   }
 
   @Get('token')
   @UseGuards(JwtAuthGuard, RightsGuard, RateLimitGuard)
   @Right(EApplicationRight.InternalUseOnly)
   @RateLimit(15, Timing.minutes(1))
-  async getMyTokens(@Req() req: Request) {
-    return await this.tokenService.listTokens(req.user);
+  async getMyTokens() {
+    return await this.tokenService.listTokens();
   }
 
   /**
@@ -72,7 +68,7 @@ export class TokenController {
   @Delete('token')
   @UseGuards(JwtAuthGuard, RateLimitGuard)
   @RateLimit(15, Timing.minutes(1))
-  async revoke(@Req() req: Request, @Query('token') token: string) {
-    await this.tokenService.revokeToken(req.user, token);
+  async revoke(@Query('token') token: string) {
+    await this.tokenService.revokeToken(token);
   }
 }

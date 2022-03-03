@@ -5,7 +5,6 @@ import urlSafeBase64 from 'urlsafe-base64';
 import config from '../../shared/config/config';
 import { JwtService } from '@nestjs/jwt';
 import { CreateSubscriptionDto, UpdateSubscriptionDto } from './push.dto';
-import { RequestUserManager } from '../../shared/managers/request.user.manager';
 import { ErrorService } from '../../shared/modules/errors/error.service';
 import { User } from '../../database/entities/user.entity';
 import { EApiError } from '../../shared/modules/errors/error.enum';
@@ -13,12 +12,14 @@ import { IFullJwt } from '../../shared/strategies/jwt.stategy';
 import { Token } from '../../database/entities/token.entity';
 import { PushMessage } from '../../database/entities/push.message.entity';
 import { IPushMessageContentJsonbModel } from '../../database/interfaces/push.message.interface';
+import { RequestContextService } from '../../shared/modules/context/request.context.service';
 
 @Injectable()
 export class PushService {
   constructor(
     @InjectConnection() private db: Connection,
     private readonly jwtService: JwtService,
+    private readonly requestContextService: RequestContextService,
   ) {}
 
   private static readonly VAPID_PUBLIC_KEY_DECODED = urlSafeBase64.decode(config.VAPID.PUBLIC);
@@ -28,7 +29,8 @@ export class PushService {
     return PushService.VAPID_PUBLIC_KEY_DECODED.toJSON().data;
   }
 
-  async createPushSubscription(user: RequestUserManager, body: CreateSubscriptionDto) {
+  async createPushSubscription(body: CreateSubscriptionDto) {
+    const user = this.requestContextService.user;
     this.ensurePushSubscriptionKeysAreOk(body.keys);
 
     const subscription: PushSubscriptionJSON = {
@@ -49,7 +51,9 @@ export class PushService {
     return { subscription: subscription.endpoint };
   }
 
-  async updatePushRequest(user: RequestUserManager, body: UpdateSubscriptionDto) {
+  async updatePushRequest(body: UpdateSubscriptionDto) {
+    const user = this.requestContextService.user;
+
     const targetUser = await ErrorService.fulfillOrHttpException(
       this.db.getRepository(User).findOneOrFail({ where: { id: Number(body.target) || 0 } }),
       EApiError.UserNotFound,
@@ -68,18 +72,16 @@ export class PushService {
     Logger.debug(`Changed notification handler for token #${linkedTokenEntity.id} from ${user.slug} to ${targetUser.slug}`);
 
     // Change receiver of notifications from one user to another.
-    // TODO: Improve, notifications could be sent to all users of a device.
-    // TODO: It can be registred through the login process.
     await this.db.getRepository(PushMessage)
       .update({ targetUserId: user.id, endpoint: body.endpoint }, { targetUserId: targetUser.id });
   }
 
-  async deletePushSubscription(user: RequestUserManager, endpoint: string) {
+  async deletePushSubscription(endpoint: string) {
     await this.db.getRepository(PushMessage)
       .createQueryBuilder('msg')
       .delete()
       .where('endpoint = :endpoint', { endpoint })
-      .andWhere('targetUserId = :userId', { userId: user.id })
+      .andWhere('targetUserId = :userId', { userId: this.requestContextService.user.id })
       .execute();
   }
 

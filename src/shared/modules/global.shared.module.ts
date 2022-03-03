@@ -7,10 +7,12 @@ import { MediasService } from './medias/medias.service';
 import { SendableRelationshipSharedService } from './sendable/sendable.relationship.shared.service';
 import { BlockSharedService } from './blocks/block.shared.service';
 import { NotificationSharedService } from './notifications/notification.shared.service';
+import { RequestContextModule } from './context/request.context.module';
+import { RequestContextService } from './context/request.context.service';
 
 @Global()
 @Module({
-  imports: [],
+  imports: [RequestContextModule],
   controllers: [],
   providers: [
     MediasService,
@@ -21,6 +23,7 @@ import { NotificationSharedService } from './notifications/notification.shared.s
     SendableSharedService,
     BlockSharedService,
     NotificationSharedService,
+    RequestContextService,
   ],
   exports: [
     MediasService,
@@ -31,6 +34,7 @@ import { NotificationSharedService } from './notifications/notification.shared.s
     SendableSharedService,
     BlockSharedService,
     NotificationSharedService,
+    RequestContextService,
   ],
 })
 export class GlobalSharedModule {}

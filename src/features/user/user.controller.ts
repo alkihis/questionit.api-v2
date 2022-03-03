@@ -1,7 +1,6 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Req, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { TEditProfileFiles, UserService } from './user.service';
 import { JwtAuthGuard } from '../../shared/guards/jwt.auth.guard';
-import { Request } from 'express';
 import { JwtOrAnonymousAuthGuard } from '../../shared/guards/jwt.or.anonymous.auth.guard';
 import { getValidationPipe } from '../../shared/pipes/validation.pipe.utils';
 import { BlockedWordsDto, EditUserDto, SearchUserDto } from './user.dto';
@@ -11,78 +10,80 @@ import config from '../../shared/config/config';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { RateLimit, RateLimitGuard } from '../../shared/guards/rate.limit.guard';
 import { Timing } from '../../shared/utils/time.utils';
+import { RequestContextService } from '../../shared/modules/context/request.context.service';
 
 @Controller()
 export class UserController {
   constructor(
     private userService: UserService,
+    private requestContextService: RequestContextService,
   ) {}
 
   @Get('user/logged')
   @UseGuards(JwtAuthGuard, RateLimitGuard)
   @RateLimit(15, Timing.minutes(1))
-  async loggedUser(@Req() req: Request) {
-    return await this.userService.getLoggedUser(req.user);
+  async loggedUser() {
+    return await this.userService.getLoggedUser();
   }
 
   @Get('user/id/:id')
   @UseGuards(JwtOrAnonymousAuthGuard, RateLimitGuard)
   @RateLimit(900, Timing.minutes(15))
-  async findUserById(@Req() req: Request, @Param('id', ParseIntPipe) id: number) {
-    return await this.userService.getUserById(req.user, id);
+  async findUserById(@Param('id', ParseIntPipe) id: number) {
+    return await this.userService.getUserById(id);
   }
 
   @Get('user/slug/:slug')
   @UseGuards(JwtOrAnonymousAuthGuard, RateLimitGuard)
   @RateLimit(900, Timing.minutes(15))
-  async findUserBySlug(@Req() req: Request, @Param('slug') slug: string) {
-    return await this.userService.getUserBySlug(req.user, slug);
+  async findUserBySlug(@Param('slug') slug: string) {
+    return await this.userService.getUserBySlug(slug);
   }
 
   @Get('user/search')
   @UseGuards(JwtOrAnonymousAuthGuard, RateLimitGuard)
   @RateLimit(180, Timing.minutes(15))
-  async searchUser(@Req() req: Request, @Query(getValidationPipe()) query: SearchUserDto) {
-    return await this.userService.searchUsers(req.user, query);
+  async searchUser(@Query(getValidationPipe()) query: SearchUserDto) {
+    return await this.userService.searchUsers(query);
   }
 
   @Get('user/check-available-slug')
   @UseGuards(JwtAuthGuard, RightsGuard, RateLimitGuard)
   @Right(EApplicationRight.InternalUseOnly)
   @RateLimit(300, Timing.minutes(15))
-  async testIfSlugIsAvailable(@Req() req: Request, @Query('slug') slug: string) {
-    return await this.userService.isSlugAvailable(req.user, slug);
+  async testIfSlugIsAvailable(@Query('slug') slug: string) {
+    return await this.userService.isSlugAvailable(slug);
   }
 
   @Patch('user/sync-profile-with-twitter')
   @UseGuards(JwtAuthGuard, RightsGuard, RateLimitGuard)
   @Right(EApplicationRight.InternalUseOnly)
   @RateLimit(15, Timing.minutes(15))
-  async syncProfileWithTwitter(@Req() req: Request) {
-    return await this.userService.syncProfileWithTwitter(req.user);
+  async syncProfileWithTwitter() {
+    return await this.userService.syncProfileWithTwitter();
   }
 
   @Delete('user')
   @UseGuards(JwtAuthGuard, RightsGuard)
   @Right(EApplicationRight.InternalUseOnly)
-  async deleteProfile(@Req() req: Request) {
-    await this.userService.deleteAccount(req.user);
+  async deleteProfile() {
+    await this.userService.deleteAccount();
   }
 
   @Get('user/settings/blocked-words')
   @UseGuards(JwtAuthGuard, RightsGuard, RateLimitGuard)
   @Right(EApplicationRight.ManageBlockedWords)
   @RateLimit(300, Timing.minutes(15))
-  async getBlockedWords(@Req() req: Request) {
-    return req.user.entity.blockedWords;
+  async getBlockedWords() {
+    return this.requestContextService.user.entity.blockedWords;
   }
 
   @Post('user/settings/blocked-words')
   @UseGuards(JwtAuthGuard, RightsGuard, RateLimitGuard)
   @Right(EApplicationRight.ManageBlockedWords)
   @RateLimit(50, Timing.minutes(15))
-  async saveBlcokedWords(@Req() req: Request, @Body(getValidationPipe()) dto: BlockedWordsDto) {
-    return await this.userService.updateBlockedUsers(req.user, dto.words);
+  async saveBlcokedWords(@Body(getValidationPipe()) dto: BlockedWordsDto) {
+    return await this.userService.updateBlockedUsers(dto.words);
   }
 
   @Post('user/settings')
@@ -99,10 +100,9 @@ export class UserController {
     },
   }))
   async editUser(
-    @Req() req: Request,
     @Body(getValidationPipe()) body: EditUserDto,
     @UploadedFiles() files: TEditProfileFiles,
   ) {
-    return await this.userService.updateUserSettings(req.user, body, files);
+    return await this.userService.updateUserSettings(body, files);
   }
 }

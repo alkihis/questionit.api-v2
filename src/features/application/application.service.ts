@@ -17,12 +17,14 @@ import config from '../../shared/config/config';
 import { RequestUserManager } from '../../shared/managers/request.user.manager';
 import { Token } from '../../database/entities/token.entity';
 import { SendableSharedService } from '../../shared/modules/sendable/sendable.shared.service';
+import { RequestContextService } from '../../shared/modules/context/request.context.service';
 
 @Injectable()
 export class ApplicationService {
   constructor(
     @InjectConnection() private db: Connection,
     private sendableService: SendableSharedService,
+    private readonly requestContextService: RequestContextService,
   ) {}
 
   async getTokenDetails(token: string) {
@@ -54,7 +56,9 @@ export class ApplicationService {
     return { token: token.token };
   }
 
-  async approveTokenForApplication(user: RequestUserManager, body: ApproveAppDto) {
+  async approveTokenForApplication(body: ApproveAppDto) {
+    const user = this.requestContextService.user;
+
     if (body.token && body.deny) {
       throw ErrorService.throw(EApiError.InvalidParameter);
     }
@@ -72,13 +76,14 @@ export class ApplicationService {
     return await this.approveTokenForUser(user, applicationToken);
   }
 
-  async listApplications(user: RequestUserManager) {
+  async listApplications() {
     return this.sendableService.getSendableApplications(
-      await this.db.getRepository(QuestionItApplication).find({ where: { ownerId: user.id } }),
+      await this.db.getRepository(QuestionItApplication).find({ where: { ownerId: this.requestContextService.user.id } }),
     );
   }
 
-  async createApplication(user: RequestUserManager, body: CreateApplicationDto) {
+  async createApplication(body: CreateApplicationDto) {
+    const user = this.requestContextService.user;
     const appCount = await this.db.getRepository(QuestionItApplication).count({ where: { ownerId: user.id } });
 
     if (appCount >= config.LIMITS.APPS_PER_USER) {
@@ -109,7 +114,8 @@ export class ApplicationService {
     return this.sendableService.getSendableApplication(application);
   }
 
-  async editApplication(user: RequestUserManager, appId: number, body: CreateApplicationDto) {
+  async editApplication(appId: number, body: CreateApplicationDto) {
+    const user = this.requestContextService.user;
     const application = await ErrorService.fulfillOrHttpException(
       this.db.getRepository(QuestionItApplication).findOneOrFail({ where: { ownerId: user.id, id: appId } }),
       EApiError.ApplicationNotFound,
@@ -136,7 +142,8 @@ export class ApplicationService {
     return this.sendableService.getSendableApplication(application);
   }
 
-  async regenerateApplicationKey(user: RequestUserManager, appId: number) {
+  async regenerateApplicationKey(appId: number) {
+    const user = this.requestContextService.user;
     const application = await ErrorService.fulfillOrHttpException(
       this.db.getRepository(QuestionItApplication).findOneOrFail({ where: { id: appId, ownerId: user.id } }),
       EApiError.ApplicationNotFound,
@@ -148,7 +155,8 @@ export class ApplicationService {
     return this.sendableService.getSendableApplication(application);
   }
 
-  async deleteApplication(user: RequestUserManager, appId: number) {
+  async deleteApplication(appId: number) {
+    const user = this.requestContextService.user;
     await ErrorService.fulfillOrHttpException(
       this.db.getRepository(QuestionItApplication).findOneOrFail({ where: { id: appId, ownerId: user.id } }),
       EApiError.ApplicationNotFound,
@@ -159,7 +167,8 @@ export class ApplicationService {
     await this.db.getRepository(QuestionItApplication).delete({ id: appId });
   }
 
-  async listActiveApplicationsFromTokens(user: RequestUserManager) {
+  async listActiveApplicationsFromTokens() {
+    const user = this.requestContextService.user;
     const openTokens = await this.db.getRepository(Token)
       .createQueryBuilder('token')
       .innerJoinAndSelect('token.application', 'app')
@@ -176,7 +185,8 @@ export class ApplicationService {
       .map(token => this.sendableService.getSendableApplicationFromToken(token));
   }
 
-  async deleteApplicationSubscription(user: RequestUserManager, appId: number) {
+  async deleteApplicationSubscription(appId: number) {
+    const user = this.requestContextService.user;
     await this.db.getRepository(Token).delete({ ownerId: user.id, appId });
   }
 

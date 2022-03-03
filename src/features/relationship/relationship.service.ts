@@ -5,7 +5,6 @@ import { User } from '../../database/entities/user.entity';
 import { ErrorService } from '../../shared/modules/errors/error.service';
 import { EApiError } from '../../shared/modules/errors/error.enum';
 import { SendableRelationshipSharedService } from '../../shared/modules/sendable/sendable.relationship.shared.service';
-import { RequestUserManager } from '../../shared/managers/request.user.manager';
 import { ListFollowersOrFollowingsDto } from './relationship.dto';
 import { paginate } from '../../shared/utils/pagination/pagination.utils';
 import { Relationship } from '../../database/entities/relationship.entity';
@@ -15,6 +14,7 @@ import { ERedisExpiration, ERedisPrefix, RedisService } from '../../shared/modul
 import { Notification } from '../../database/entities/notification.entity';
 import { ENotificationType, INotificationNewFollowerContentPayload } from '../../database/interfaces/notification.interface';
 import { NotificationSharedService } from '../../shared/modules/notifications/notification.shared.service';
+import { RequestContextService } from '../../shared/modules/context/request.context.service';
 
 @Injectable()
 export class RelationshipService {
@@ -23,6 +23,7 @@ export class RelationshipService {
     private sendableService: SendableSharedService,
     private sendableRelationshipService: SendableRelationshipSharedService,
     private notificationSharedService: NotificationSharedService,
+    private requestContextService: RequestContextService,
   ) {}
 
   async getRelationshipBetween(userId1: number, userId2: number) {
@@ -43,7 +44,8 @@ export class RelationshipService {
     return await this.sendableRelationshipService.relationshipBetween(user1, user2);
   }
 
-  async getFollowersList(user: RequestUserManager, targetUserId: number, pagination: ListFollowersOrFollowingsDto) {
+  async getFollowersList(targetUserId: number, pagination: ListFollowersOrFollowingsDto) {
+    const user = this.requestContextService.user;
     // Followers of targetUserId: relationships where toUserId=targetUserId
 
     return paginate<User, ISentUser>({
@@ -62,7 +64,8 @@ export class RelationshipService {
     });
   }
 
-  async getFollowingsList(user: RequestUserManager, targetUserId: number, pagination: ListFollowersOrFollowingsDto) {
+  async getFollowingsList(targetUserId: number, pagination: ListFollowersOrFollowingsDto) {
+    const user = this.requestContextService.user;
     // Followers of targetUserId: relationships where fromUserId=targetUserId
 
     return paginate<User, ISentUser>({

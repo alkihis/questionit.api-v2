@@ -1,8 +1,13 @@
 import * as path from 'path';
+import type { LoggerOptions } from 'typeorm';
 
 const rootDir = path.resolve(__dirname, '..', '..', '..');
 
 const config = {
+  ENV_IS: {
+    DEV: process.env.NODE_ENV === 'development',
+    PROD: process.env.NODE_ENV === 'production',
+  },
   URL: process.env.QUESTIONIT_API_URL || 'http://localhost:5001',
   WEB_URL: process.env.WEB_URL || 'http://localhost:5002',
   WEB_PUBLIC_URL: process.env.WEB_PUBLIC_URL || 'https://questionit.space',
@@ -12,7 +17,7 @@ const config = {
     PASSWORD: process.env.DB_PASSWORD || 'questionit',
     HOST: process.env.DB_HOST || 'postgres',
     DATABASE: process.env.DB_DATABASE || 'questionit',
-    LOGGING: true,
+    LOGGING: (process.env.NODE_ENV === 'development' ? ['query', 'error', 'schema', 'warn', 'info', 'log'] : ['error']) as LoggerOptions,
   },
   JWT: {
     SECRET: process.env.APP_SECRET || 'questionit',

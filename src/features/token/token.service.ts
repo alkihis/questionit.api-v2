@@ -26,6 +26,7 @@ import { ERedisExpiration, ERedisPrefix, RedisService } from '../../shared/modul
 import { isAppTokenExpired } from '../../shared/utils/application.token.utils';
 import { Timing } from '../../shared/utils/time.utils';
 import { DateTime } from 'luxon';
+import { RequestContextService } from '../../shared/modules/context/request.context.service';
 
 @Injectable()
 export class TokenService {
@@ -34,6 +35,7 @@ export class TokenService {
     private readonly jwtService: JwtService,
     private readonly twitterService: TwitterService,
     private readonly sendableService: SendableSharedService,
+    private readonly requestContextService: RequestContextService,
   ) {}
 
   private static readonly internalTokenExpiration = Timing.days(31);
@@ -59,7 +61,8 @@ export class TokenService {
     };
   }
 
-  async loginFromTwitter(req: Request, query: GetAccessTokenDto) {
+  async loginFromTwitter(query: GetAccessTokenDto) {
+    const req = this.requestContextService.request;
     const userRepository = this.db.getRepository(User);
 
     const client = await this.getLoggedClientFromTemporaryTokens(query);
@@ -92,7 +95,8 @@ export class TokenService {
     };
   }
 
-  async checkUserTokensValidity(user: RequestUserManager) {
+  async checkUserTokensValidity() {
+    const user = this.requestContextService.user;
     const client = this.twitterService.getClientForUser(user.entity);
 
     const twitterUser = await ErrorService.fulfillOrHttpException(client.currentUser(), EApiError.InvalidTwitterCredentials);
@@ -112,7 +116,9 @@ export class TokenService {
     };
   }
 
-  async createTokenForApplication(req: Request, dto: CreateTokenDto) {
+  async createTokenForApplication(dto: CreateTokenDto) {
+    const req = this.requestContextService.request;
+
     const { appToken, application } = await this.getAppAndTokenFromCreateTokenRequest(dto);
     const tokenData = await this.decodeAppTokenData(appToken.token);
     const user = await ErrorService.fulfillOrHttpException(
@@ -138,7 +144,9 @@ export class TokenService {
     };
   }
 
-  async revokeToken(user: RequestUserManager, token: string) {
+  async revokeToken(token: string) {
+    const user = this.requestContextService.user;
+
     if (!user.hasRight(EApplicationRight.InternalUseOnly) || !token) {
       // If does not have the right to use other tokens (or if token is not set)
       token = user.requestTokenInformation.tokenId;
@@ -159,7 +167,8 @@ export class TokenService {
     Logger.debug('Revoked token: ' + entity.jti);
   }
 
-  async listTokens(user: RequestUserManager) {
+  async listTokens() {
+    const user = this.requestContextService.user;
     const tokens = this.sendableService.getSendableTokens(await this.db.getRepository(Token).find({ ownerId: user.id }));
     const currentToken = tokens.find(t => t.jti === user.requestTokenInformation.tokenId);
 
@@ -170,7 +179,9 @@ export class TokenService {
     return tokens;
   }
 
-  async refreshToken(req: Request, user: RequestUserManager) {
+  async refreshToken() {
+    const req = this.requestContextService.request;
+    const user = this.requestContextService.user;
     const isInternal = user.hasRight(EApplicationRight.InternalUseOnly);
 
     if (isInternal) {

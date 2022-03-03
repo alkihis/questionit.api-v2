@@ -9,15 +9,18 @@ import { SendableSharedService } from '../../shared/modules/sendable/sendable.sh
 import { EApplicationRight } from '../../database/enums/questionit.application.enum';
 import { ENotificationType, INotificationCounts } from '../../database/interfaces/notification.interface';
 import { Question } from '../../database/entities/question.entity';
+import { RequestContextService } from '../../shared/modules/context/request.context.service';
 
 @Injectable()
 export class NotificationService {
   constructor(
     @InjectConnection() private db: Connection,
     private sendableService: SendableSharedService,
+    private requestContextService: RequestContextService,
   ) {}
 
-  async listNotifications(user: RequestUserManager, query: ListNotificationDto) {
+  async listNotifications(query: ListNotificationDto) {
+    const user = this.requestContextService.user;
     const paginatedNotifications = await paginateWithIds({
       qb: this.getNotificationOfUserQb(user),
       paginationDto: query,
@@ -35,12 +38,14 @@ export class NotificationService {
     return paginatedNotifications;
   }
 
-  async markAllNotificationsAsSeen(user: RequestUserManager) {
+  async markAllNotificationsAsSeen() {
+    const user = this.requestContextService.user;
     await this.db.getRepository(Notification)
       .update({ userId: user.id }, { seen: true });
   }
 
-  async getNotificationCounts(user: RequestUserManager) {
+  async getNotificationCounts() {
+    const user = this.requestContextService.user;
     const counts: INotificationCounts = {
       questions: 0,
       notifications: await this.getNotificationOfUserQb(user)
@@ -60,7 +65,9 @@ export class NotificationService {
     return counts;
   }
 
-  async deleteNotificationById(user: RequestUserManager, id: string) {
+  async deleteNotificationById(id: string) {
+    const user = this.requestContextService.user;
+
     if (id === 'all') {
       await this.db.getRepository(Notification).delete({ userId: user.id });
     } else {

@@ -11,15 +11,18 @@ import { DateTime } from 'luxon';
 import { SendableSharedService } from '../../shared/modules/sendable/sendable.shared.service';
 import { Question } from '../../database/entities/question.entity';
 import { v4 as uuid } from 'uuid';
+import { RequestContextService } from '../../shared/modules/context/request.context.service';
 
 @Injectable()
 export class DayQuestionService {
   constructor(
     @InjectConnection() private db: Connection,
     private sendableService: SendableSharedService,
+    private requestContextService: RequestContextService,
   ) {}
 
-  async getQuestionOfTheDay(user: RequestUserManager, lang: TDayQuestionLanguage, date: Date) {
+  async getQuestionOfTheDay(lang: TDayQuestionLanguage, date: Date) {
+    const user = this.requestContextService.user;
     const dayQuestion = await this.getQuestionOfTheDayEntity(user, lang, date);
     return await this.sendableService.getSendableQuestionFromDayQuestion(dayQuestion, { context: user.entity, lang });
   }

@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/typeorm';
 import { Connection, In } from 'typeorm';
-import { RequestUserManager } from '../../shared/managers/request.user.manager';
 import { SendableRelationshipSharedService } from '../../shared/modules/sendable/sendable.relationship.shared.service';
 import { ErrorService } from '../../shared/modules/errors/error.service';
 import { EApiError } from '../../shared/modules/errors/error.enum';
@@ -9,24 +8,19 @@ import { User } from '../../database/entities/user.entity';
 import { Block } from '../../database/entities/block.entity';
 import { Question } from '../../database/entities/question.entity';
 import { Relationship } from '../../database/entities/relationship.entity';
+import { RequestContextService } from '../../shared/modules/context/request.context.service';
 
 @Injectable()
 export class BlockService {
   constructor(
     @InjectConnection() private db: Connection,
     private readonly sendableRelationshipService: SendableRelationshipSharedService,
+    private readonly requestContextService: RequestContextService,
   ) {}
 
-  async blockUser(user: RequestUserManager, userId: number) {
-    if (user.id === userId) {
-      throw ErrorService.throw(EApiError.BadRequest);
-    }
-
-    const targetUser = await ErrorService.fulfillOrHttpException(
-      this.db.getRepository(User).findOneOrFail({ where: { id: userId } }),
-      EApiError.UserNotFound,
-    );
-    const relationship = await this.sendableRelationshipService.relationshipBetween(user.entity, targetUser);
+  async blockUser(userId: number) {
+    const user = this.requestContextService.user;
+    const { targetUser, relationship } = await this.getUserAndRelationshipWith(userId);
 
     if (!relationship.hasBlocked) {
       await this.makeUserBlock(user.entity, targetUser);
@@ -35,7 +29,20 @@ export class BlockService {
     return await this.sendableRelationshipService.relationshipBetween(user.entity, targetUser);
   }
 
-  async unblockUser(user: RequestUserManager, userId: number) {
+  async unblockUser(userId: number) {
+    const user = this.requestContextService.user;
+    const { targetUser, relationship } = await this.getUserAndRelationshipWith(userId);
+
+    if (relationship.hasBlocked) {
+      await this.db.getRepository(Block).delete({ ownerId: user.id, targetId: userId });
+    }
+
+    return await this.sendableRelationshipService.relationshipBetween(user.entity, targetUser);
+  }
+
+  private async getUserAndRelationshipWith(userId: number) {
+    const user = this.requestContextService.user;
+
     if (user.id === userId) {
       throw ErrorService.throw(EApiError.BadRequest);
     }
@@ -46,11 +53,7 @@ export class BlockService {
     );
     const relationship = await this.sendableRelationshipService.relationshipBetween(user.entity, targetUser);
 
-    if (relationship.hasBlocked) {
-      await this.db.getRepository(Block).delete({ ownerId: user.id, targetId: userId });
-    }
-
-    return await this.sendableRelationshipService.relationshipBetween(user.entity, targetUser);
+    return { targetUser, relationship };
   }
 
   private async makeUserBlock(source: User, target: User) {

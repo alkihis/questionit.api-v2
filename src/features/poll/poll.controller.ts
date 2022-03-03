@@ -1,9 +1,8 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { PollService } from './poll.service';
 import { JwtOrAnonymousAuthGuard } from '../../shared/guards/jwt.or.anonymous.auth.guard';
 import { Right, RightsGuard } from '../../shared/guards/rights.guard';
 import { EApplicationRight } from '../../database/enums/questionit.application.enum';
-import { Request } from 'express';
 import { getValidationPipe } from '../../shared/pipes/validation.pipe.utils';
 import { MakePollDto } from './poll.dto';
 import { RateLimit, RateLimitGuard } from '../../shared/guards/rate.limit.guard';
@@ -19,7 +18,7 @@ export class PollController {
   @UseGuards(JwtOrAnonymousAuthGuard, RightsGuard, RateLimitGuard)
   @Right(EApplicationRight.SendQuestion)
   @RateLimit(5, Timing.minutes(1))
-  async makePoll(@Req() req: Request, @Body(getValidationPipe()) body: MakePollDto) {
-    return await this.pollService.makePoll(req, body);
+  async makePoll(@Body(getValidationPipe()) body: MakePollDto) {
+    return await this.pollService.makePoll(body);
   }
 }

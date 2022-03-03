@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/typeorm';
 import { Connection } from 'typeorm';
-import { RequestUserManager } from '../../shared/managers/request.user.manager';
 import { SendableSharedService } from '../../shared/modules/sendable/sendable.shared.service';
 import { Question } from '../../database/entities/question.entity';
 import { ErrorService } from '../../shared/modules/errors/error.service';
@@ -9,6 +8,7 @@ import { EApiError } from '../../shared/modules/errors/error.enum';
 import { Like } from '../../database/entities/like.entity';
 import { BlockSharedService } from '../../shared/modules/blocks/block.shared.service';
 import { EApplicationRight } from '../../database/enums/questionit.application.enum';
+import { RequestContextService } from '../../shared/modules/context/request.context.service';
 
 @Injectable()
 export class LikeService {
@@ -16,9 +16,11 @@ export class LikeService {
     @InjectConnection() private db: Connection,
     private sendableService: SendableSharedService,
     private blockSharedService: BlockSharedService,
+    private requestContextService: RequestContextService,
   ) {}
 
-  async createLike(user: RequestUserManager, answerId: number) {
+  async createLike(answerId: number) {
+    const user = this.requestContextService.user;
     const likeRepository = this.db.getRepository(Like);
     const question = await this.getQuestionWithAnswer(answerId);
     const likeExists = await likeRepository.count({ where: { emitterId: user.id, answerId } });
@@ -34,7 +36,8 @@ export class LikeService {
     });
   }
 
-  async deleteLike(user: RequestUserManager, answerId: number) {
+  async deleteLike(answerId: number) {
+    const user = this.requestContextService.user;
     const question = await this.getQuestionWithAnswer(answerId);
 
     await this.db.getRepository(Like)

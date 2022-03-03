@@ -4,23 +4,26 @@ import { Connection } from 'typeorm';
 import { MakePollDto } from './poll.dto';
 import { cleanBlankCharacters } from '../../shared/utils/string.utils';
 import { Poll } from '../../database/entities/poll.entity';
-import { Request } from 'express';
 import { DateTime } from 'luxon';
 import { IUnusedSentPoll } from '../../database/interfaces/poll.interface';
+import { RequestContextService } from '../../shared/modules/context/request.context.service';
 
 @Injectable()
 export class PollService {
   constructor(
     @InjectConnection() private db: Connection,
+    private requestContextService: RequestContextService,
   ) {}
 
-  async makePoll(request: Request, dto: MakePollDto): Promise<IUnusedSentPoll> {
+  async makePoll(dto: MakePollDto): Promise<IUnusedSentPoll> {
+    const context = this.requestContextService;
+
     const options = dto.options.map(option => cleanBlankCharacters(option));
     const pollValidity = DateTime.now().plus({ minutes: 15 });
 
     const poll = this.db.getRepository(Poll).create({
-      ownerId: request.user?.id || null,
-      emitterIp: request.ips?.[0] || request.ip,
+      ownerId: context.user?.id || null,
+      emitterIp: context.request.ips?.[0] || context.request.ip,
       options,
     });
 

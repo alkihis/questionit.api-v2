@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 import { CliModuleController } from './cli.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { DB_CONFIG } from '../../../database/config';
+import { DatabaseConfigService } from '../../../database/database.config.service';
 
 @Module({
   imports: [
     // Database
-    TypeOrmModule.forRoot(DB_CONFIG),
+    TypeOrmModule.forRoot(DatabaseConfigService.getConfig()),
   ],
   controllers: [CliModuleController],
   providers: [],

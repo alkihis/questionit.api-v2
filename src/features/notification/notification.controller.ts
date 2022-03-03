@@ -1,9 +1,8 @@
-import { Controller, Delete, Get, Param, ParseIntPipe, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import { JwtAuthGuard } from '../../shared/guards/jwt.auth.guard';
 import { Right, RightsGuard } from '../../shared/guards/rights.guard';
 import { EApplicationRight } from '../../database/enums/questionit.application.enum';
-import { Request } from 'express';
 import { getValidationPipe } from '../../shared/pipes/validation.pipe.utils';
 import { ListNotificationDto } from './notification.dto';
 import { RateLimit, RateLimitGuard } from '../../shared/guards/rate.limit.guard';
@@ -19,34 +18,34 @@ export class NotificationController {
   @UseGuards(JwtAuthGuard, RightsGuard, RateLimitGuard)
   @Right(EApplicationRight.ReadNotification)
   @RateLimit(60, Timing.minutes(1))
-  async listNotifications(@Req() req: Request, @Query(getValidationPipe()) query: ListNotificationDto) {
-    return await this.notificationService.listNotifications(req.user, query);
+  async listNotifications(@Query(getValidationPipe()) query: ListNotificationDto) {
+    return await this.notificationService.listNotifications(query);
   }
 
   @Post('notification/bulk-all-as-seen')
   @UseGuards(JwtAuthGuard, RightsGuard, RateLimitGuard)
   @Right(EApplicationRight.ReadNotification)
   @RateLimit(15, Timing.minutes(1))
-  async markNotificationAsSeen(@Req() req: Request) {
-    await this.notificationService.markAllNotificationsAsSeen(req.user);
-    return await this.notificationService.getNotificationCounts(req.user);
+  async markNotificationAsSeen() {
+    await this.notificationService.markAllNotificationsAsSeen();
+    return await this.notificationService.getNotificationCounts();
   }
 
   @Get('notification/counts')
   @UseGuards(JwtAuthGuard, RightsGuard, RateLimitGuard)
   @Right(EApplicationRight.ReadNotification)
   @RateLimit(900, Timing.minutes(15))
-  async getNotificationCounts(@Req() req: Request) {
-    return await this.notificationService.getNotificationCounts(req.user);
+  async getNotificationCounts() {
+    return await this.notificationService.getNotificationCounts();
   }
 
   @Delete('notification/:id')
   @UseGuards(JwtAuthGuard, RightsGuard, RateLimitGuard)
   @Right(EApplicationRight.DeleteNotification)
   @RateLimit(180, Timing.minutes(1))
-  async deleteNotificationById(@Req() req: Request, @Param('id') id: string) {
-    await this.notificationService.deleteNotificationById(req.user, id);
+  async deleteNotificationById(@Param('id') id: string) {
+    await this.notificationService.deleteNotificationById(id);
 
-    return await this.notificationService.getNotificationCounts(req.user);
+    return await this.notificationService.getNotificationCounts();
   }
 }
