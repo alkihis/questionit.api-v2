@@ -1,6 +1,6 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import config from '../config/config';
 import { EApiError } from '../modules/errors/error.enum';
 import { ErrorService } from '../modules/errors/error.service';
@@ -73,8 +73,9 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     entity.lastLoginAt = new Date();
     entity.lastIp = loginIp;
 
-    await this.db.getRepository(Token)
-      .update({ id: entity.id }, { lastIp: loginIp, lastLoginAt: entity.lastLoginAt });
+    this.db.getRepository(Token)
+      .update({ id: entity.id }, { lastIp: loginIp, lastLoginAt: entity.lastLoginAt })
+      .catch(error => Logger.error(`Unable to update token ${entity.id} for user ${payload.userId}: ${error.stack}`));
 
     // Verify if user exists
     const user = await this.db.getRepository(User).findOne({ id: Number(payload.userId) || -1 });

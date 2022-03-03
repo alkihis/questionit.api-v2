@@ -5,6 +5,7 @@ import CliHelper, { CliListener } from 'interactive-cli-helper';
 import { User } from '../../../database/entities/user.entity';
 import { DayQuestion } from '../../../database/entities/day.question.entity';
 import config from '../../config/config';
+import fs from 'fs';
 
 const helpMessage = CliHelper.formatHelp('QuestionIt.space server', {
   commands: {
@@ -151,6 +152,7 @@ export class CliModuleController {
           get: 'Get a day question by ID',
           'set-active': 'Force a day question to be set',
           'remove-active': 'If any, remove the active day question',
+          load: 'Load file containing questions into database',
         },
         description: 'Manage registered daily questions in QuestionIt.space\n',
       }
@@ -187,6 +189,42 @@ export class CliModuleController {
       }
 
       return results;
+    });
+
+    cli.command('load', async () => {
+      const file = await fs.promises.readFile(config.DATA.DAY_QUESTIONS, 'utf-8');
+      const parsedFile = JSON.parse(file) as { questions: { en: string, fr: string, id?: number }[] };
+
+      const questions: DayQuestion[] = [];
+
+      for (const question of parsedFile.questions) {
+        if (question.id) {
+          const existingQuestion = await repository.findOneOrFail(question.id);
+
+          if (question.en) {
+            existingQuestion.content.en = question.en;
+          }
+          if (question.fr) {
+            existingQuestion.content.fr = question.fr;
+          }
+
+          questions.push(existingQuestion);
+        } else {
+          questions.push(repository.create({
+            hidden: false,
+            content: {
+              fr: question.fr,
+              en: question.en,
+            },
+          }));
+        }
+      }
+
+      if (questions.length) {
+        await repository.save(questions);
+      }
+
+      return questions;
     });
 
     cli.command('set-active', async rest => {

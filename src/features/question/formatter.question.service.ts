@@ -53,7 +53,7 @@ export class FormatterQuestionService {
 
     const text = content + ' – ' + answer;
 
-    const url = config.WEB_URL + '/u/' + receiver.slug + '/' + question.id;
+    const url = `${config.WEB_PUBLIC_URL}/u/${receiver.slug}/${question.id}`;
 
     const final = `${text.trim()}${answerHashtag ? ` ${answerHashtag}` : ''} ${url}`;
     const topPadder = receiver.useRocketEmojiInQuestions ? '🚀 ' : '';

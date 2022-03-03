@@ -4,4 +4,5 @@ export enum EQueueCronName {
   MediasCleaning = 'MEDIAS_CLEANING',
   UnaffectedPolls = 'UNAFFECTED_POLLS',
   TokenCleaning = 'TOKEN_CLEANING',
+  SettingsRefresher = 'SETTINGS_REFRESHER',
 }

@@ -5,6 +5,7 @@ const rootDir = path.resolve(__dirname, '..', '..', '..');
 const config = {
   URL: process.env.QUESTIONIT_API_URL || 'http://localhost:5001',
   WEB_URL: process.env.WEB_URL || 'http://localhost:5002',
+  WEB_PUBLIC_URL: process.env.WEB_PUBLIC_URL || 'https://questionit.space',
   ROOT_DIR: rootDir,
   DB: {
     USER: process.env.DB_USER || 'questionit',
@@ -74,6 +75,7 @@ const config = {
   DATA: {
     BANNED_IPS: path.resolve(rootDir, 'data', 'banned.ips.json'),
     BANNED_WORDS: path.resolve(rootDir, 'data', 'banned.words.json'),
+    DAY_QUESTIONS: path.resolve(rootDir, 'data', 'add.day.questions.json'),
   },
   WORKERS: {
     IMAGE_CONVERTOR: path.resolve(rootDir, 'dist', 'shared', 'workers', 'image.convertor.worker.js'),

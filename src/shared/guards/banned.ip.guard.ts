@@ -1,5 +1,4 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import fs from 'fs';
 import config from '../config/config';
@@ -20,8 +19,6 @@ export class BannedIpGuard implements CanActivate {
   static bannedTorIps: Set<string> = new Set();
   static bannedTwitterIds: Set<string> = new Set();
 
-  static bannedIpTimeout: NodeJS.Timeout | null = null;
-
   constructor() {}
 
   static refreshBannedIps() {
@@ -31,15 +28,6 @@ export class BannedIpGuard implements CanActivate {
     this.bannedAccounts = new Set(bannedIps.accounts);
     this.bannedTwitterIds = new Set(bannedIps.twitterIds);
     this.refreshBannedTorIps().catch(() => {});
-
-    if (this.bannedIpTimeout) {
-      clearTimeout(this.bannedIpTimeout);
-    }
-
-    this.bannedIpTimeout = setTimeout(() => {
-      // Every hour, do this again
-      this.refreshBannedIps();
-    }, 60 * 60 * 1000);
   }
 
   static async refreshBannedTorIps() {

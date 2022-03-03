@@ -1,6 +1,7 @@
 {
   "questions": [],
   "__example__": [
-    {"fr": "Bonjour", "en": "Hello"}
+    {"fr": "Bonjour", "en": "Hello"},
+    {"fr": "Bonjour", "en": "Hello", "id": 0}
   ]
 }
