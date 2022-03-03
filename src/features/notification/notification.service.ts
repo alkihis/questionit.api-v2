@@ -58,7 +58,7 @@ export class NotificationService {
         .createQueryBuilder('question')
         .leftJoin('question.answer', 'answer')
         .where('question.receiverId = :userId', { userId: user.id })
-        .andWhere('answer IS NULL')
+        .andWhere('answer.id IS NULL')
         .getCount();
     }
 

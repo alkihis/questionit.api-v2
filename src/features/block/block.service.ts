@@ -61,7 +61,7 @@ export class BlockService {
     const deletableQuestions = await this.db.getRepository(Question)
       .createQueryBuilder('question')
       .leftJoin('question.answer', 'answer')
-      .where('answer IS NULL')
+      .where('answer.id IS NULL')
       // Remove any unanswered question from blocked user & remove any unanswered question to blocked user
       .andWhere('((question.ownerId = :sourceUserId AND question.receiverId = :targetUserId) OR (question.ownerId = :targetUserId AND question.receiverId = :sourceUserId))')
       .setParameters({ targetUserId: target.id, sourceUserId: source.id })

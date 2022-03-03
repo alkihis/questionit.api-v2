@@ -201,7 +201,7 @@ export class QuestionService {
       this.db.getRepository(Question)
         .createQueryBuilder('question')
         .innerJoinAndSelect('question.answer', 'answer')
-        .where('answer IS NOT NULL')
+        .where('answer.id IS NOT NULL')
         .andWhere('question.id = :inReplyToQuestionId', { inReplyToQuestionId: dto.inReplyToQuestionId })
         .getOneOrFail(),
       EApiError.OriginalQuestionNotFound,
@@ -256,7 +256,7 @@ export class QuestionService {
       qb: this.db.getRepository(Question)
         .createQueryBuilder('question')
         .leftJoin('question.answer', 'answer')
-        .where('answer IS NULL')
+        .where('answer.id IS NULL')
         .andWhere('question.receiverId = :userId', { userId: user.id })
         .andWhere('question.muted = :muted', { muted: dto.muted || false }),
       paginationDto: dto,
@@ -278,7 +278,7 @@ export class QuestionService {
     const questions = await this.db.getRepository(Question)
       .createQueryBuilder('question')
       .leftJoin('question.answer', 'answer')
-      .where('answer IS NULL')
+      .where('answer.id IS NULL')
       .andWhere('question.receiverId = :userId', { userId: user.id })
       .select(['question.id', 'question.muted'])
       .getMany();
@@ -309,7 +309,7 @@ export class QuestionService {
         .createQueryBuilder('question')
         .leftJoin('question.answer', 'answer')
         .where('question.id = :questionId', { questionId })
-        .andWhere('(answer IS NOT NULL OR question.receiverId = :receiverId)', { receiverId: user?.id })
+        .andWhere('(answer.id IS NOT NULL OR question.receiverId = :receiverId)', { receiverId: user?.id })
         .getOneOrFail(),
       EApiError.QuestionNotFound,
     );
@@ -335,7 +335,7 @@ export class QuestionService {
       .createQueryBuilder('question')
       .leftJoin('question.answer', 'answer')
       .where('question.conversationId = :conversationId', { conversationId: question.conversationId })
-      .andWhere('(answer IS NOT NULL OR question.receiverId = :receiverId)', { receiverId: user?.id })
+      .andWhere('(answer.id IS NOT NULL OR question.receiverId = :receiverId)', { receiverId: user?.id })
       .getCount();
   }
 
@@ -490,7 +490,7 @@ export class QuestionService {
       .leftJoin('question.answer', 'answer')
       .leftJoinAndSelect('question.poll', 'poll')
       .where('question.receiverId = :userId', { userId: user.id })
-      .andWhere('answer IS NULL')
+      .andWhere('answer.id IS NULL')
       .getMany();
 
     const questionsBlockedWords = this.getQuestionsWithBlockedWords(user, pendingQuestions);
@@ -591,7 +591,7 @@ export class QuestionService {
         .leftJoinAndSelect('question.inReplyToQuestion', 'inreplyto')
         .where('question.id = :questionId', { questionId })
         .andWhere('question.receiverId = :userId', { userId: user.id })
-        .andWhere('answer IS NULL')
+        .andWhere('answer.id IS NULL')
         .getOneOrFail(),
       EApiError.QuestionNotFound,
     );
