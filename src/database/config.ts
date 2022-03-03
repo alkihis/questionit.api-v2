@@ -10,7 +10,7 @@ export const DB_CONFIG: TypeOrmModuleOptions = {
   password: config.DB.PASSWORD,
   database: config.DB.DATABASE,
   entities: [...ENTITIES],
-  logging: config.DB.LOGGING,
+  logging: false && config.DB.LOGGING,
   migrationsRun: false,
   migrations: [__dirname + '/migrations/**/*{.ts,.js}'],
   cli: {
