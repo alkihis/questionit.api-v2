@@ -13,7 +13,7 @@ import { RequestContext } from './request.context.model';
 export class RequestContextMiddleware implements NestMiddleware<Request, Response> {
   use(req: Request, res: Response, next: () => void) {
     const requestContext = new RequestContext(req, res);
-    RequestContext.cls.setContext(requestContext);
+    RequestContext.cls.enterWith(requestContext);
 
     next();
   }
