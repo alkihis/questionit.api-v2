@@ -74,7 +74,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     entity.lastIp = loginIp;
 
     await this.db.getRepository(Token)
-      .update({ id: entity.id }, { lastIp: loginIp, lastLoginAt: new Date() });
+      .update({ id: entity.id }, { lastIp: loginIp, lastLoginAt: entity.lastLoginAt });
 
     // Verify if user exists
     const user = await this.db.getRepository(User).findOne({ id: Number(payload.userId) || -1 });
@@ -96,6 +96,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       applicationId: payload.appId || null,
       rights,
       loginIp,
+      token: entity,
     });
   }
 }

@@ -12,7 +12,7 @@ export interface ISentRegistredApplication {
 export type TPossibleRight = 'sendQuestion' | 'answerQuestion' | 'likeQuestion'
   | 'followUser' | 'blockUser' | 'readTimeline' | 'deleteQuestion' | 'readNotification'
   | 'deleteNotification' | 'readWaitingQuestion' | 'pinQuestion' | 'readRelationship'
-  | 'manageBlockedWords';
+  | 'manageBlockedWords' | 'refreshToken';
 
 export type TRightsObject = {
   [K in TPossibleRight]: boolean;

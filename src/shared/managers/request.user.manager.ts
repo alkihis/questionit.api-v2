@@ -2,6 +2,7 @@ import { User } from '../../database/entities/user.entity';
 import { Connection, getConnection } from 'typeorm';
 import { EApplicationRight } from '../../database/enums/questionit.application.enum';
 import { getRightsAsObject } from '../utils/rights.utils';
+import { Token } from '../../database/entities/token.entity';
 
 export interface IRequestTokenInformation {
   rights: number;
@@ -10,6 +11,7 @@ export interface IRequestTokenInformation {
   emission: number;
   applicationId: string | null;
   loginIp: string;
+  token: Token;
 }
 
 export class RequestUserManager {

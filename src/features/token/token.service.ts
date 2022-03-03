@@ -74,30 +74,12 @@ export class TokenService {
       await this.twitterService.refreshProfilePicturesFromTwitter(user);
     }
 
-    // Generate the future JWTid
-    const jwtid = uuid();
-
-    // Generate a JWT
-    const expiresIn = TokenService.internalTokenExpiration.asSeconds;
-    const expiresAt = DateTime.utc().plus({ second: expiresIn }).toJSDate();
-
-    const accessToken = await this.jwtService.signAsync({ userId: user.id.toString() } as IJwt, { jwtid, expiresIn });
-
-    // Save the JWT in database
-    const dbToken = this.db.getRepository(Token).create({
-      ownerId: user.id,
-      lastIp: req.ips?.join(',') || req.ip,
-      openIp: req.ips?.join(',') || req.ip,
-      lastLoginAt: new Date(),
-      jti: jwtid,
-      expiresAt,
-    });
-
-    await this.db.getRepository(Token).save(dbToken);
+    const { token: accessToken, entity: dbToken } = await this.createInternalToken(req, user);
 
     // Send it
     return {
       token: accessToken,
+      expiresAt: dbToken.expiresAt,
       user: await this.sendableService.getSendableUser(user, {
         context: user,
         withRelationships: true,
@@ -124,6 +106,7 @@ export class TokenService {
 
     return {
       twitter: twitterUser,
+      expiresAt: user.requestTokenInformation.token.expiresAt,
       user: loggedUser,
       rights: user.getRights(),
     };
@@ -137,38 +120,14 @@ export class TokenService {
       EApiError.UserNotFound,
     );
 
-    // Generate the future JWTid
-    const jwtid = uuid();
-
-    // Generate a JWT
-    const expiresIn = TokenService.appTokenExpiration.asSeconds;
-    const expiresAt = DateTime.utc().plus({ second: expiresIn }).toJSDate();
-
-    const accessToken = await this.jwtService.signAsync({
-      userId: appToken.ownerId.toString(),
-      appId: appToken.applicationId.toString(),
-      rights: tokenData.rights.toString(),
-      appKey: application.key,
-    } as IJwt, { jwtid, expiresIn });
-
-    // Save the JWT in database
-    const entity = this.db.getRepository(Token).create({
-      jti: jwtid,
-      rights: tokenData.rights.toString(),
-      lastLoginAt: new Date(),
-      ownerId: appToken.ownerId,
-      appId: appToken.applicationId,
-      openIp: req.ips?.join(',') || req.ip,
-      expiresAt,
-    });
-
-    await this.db.getRepository(Token).save(entity);
+    const { token: accessToken, entity } = await this.createAppToken(req, user, tokenData.rights, application);
     // Delete used app token
     await this.db.getRepository(ApplicationToken).delete({ id: appToken.id });
 
     // Send it
     return {
       token: accessToken,
+      expiresAt: entity.expiresAt,
       user: await this.sendableService.getSendableUser(user, {
         context: user,
         withRelationships: RequestUserManager.hasRight(tokenData.rights, EApplicationRight.ReadRelationship),
@@ -209,6 +168,81 @@ export class TokenService {
     }
 
     return tokens;
+  }
+
+  async refreshToken(req: Request, user: RequestUserManager) {
+    const isInternal = user.hasRight(EApplicationRight.InternalUseOnly);
+
+    if (isInternal) {
+      const { token, entity } = await this.createInternalToken(req, user.entity);
+      return { token, expiresAt: entity.expiresAt };
+    } else {
+      const rights = user.rights;
+      const application = await ErrorService.fulfillOrHttpException(
+        this.db.getRepository(QuestionItApplication).findOneOrFail(Number(user.requestTokenInformation.applicationId) || -1),
+        EApiError.ApplicationNotFound,
+      );
+
+      const { token, entity } = await this.createAppToken(req, user.entity, rights, application);
+      return { token, expiresAt: entity.expiresAt };
+    }
+  }
+
+  private async createInternalToken(req: Request, user: User) {
+    // Generate the future JWTid
+    const jwtid = uuid();
+
+    // Generate a JWT
+    const expiresIn = TokenService.internalTokenExpiration.asSeconds;
+    const expiresAt = DateTime.utc().plus({ second: expiresIn }).toJSDate();
+
+    const accessToken = await this.jwtService.signAsync({ userId: user.id.toString() } as IJwt, { jwtid, expiresIn });
+
+    // Save the JWT in database
+    const dbToken = this.db.getRepository(Token).create({
+      ownerId: user.id,
+      lastIp: req.ips?.join(',') || req.ip,
+      openIp: req.ips?.join(',') || req.ip,
+      lastLoginAt: new Date(),
+      jti: jwtid,
+      expiresAt,
+    });
+
+    await this.db.getRepository(Token).save(dbToken);
+
+    return { entity: dbToken, token: accessToken };
+  }
+
+  private async createAppToken(req: Request, user: User, rights: number, application: QuestionItApplication) {
+    // Generate the future JWTid
+    const jwtid = uuid();
+
+    // Generate a JWT
+    const expiresIn = TokenService.appTokenExpiration.asSeconds;
+    const expiresAt = DateTime.utc().plus({ second: expiresIn }).toJSDate();
+
+    const accessToken = await this.jwtService.signAsync({
+      userId: user.id.toString(),
+      appId: application.id.toString(),
+      rights: rights.toString(),
+      appKey: application.key,
+    } as IJwt, { jwtid, expiresIn });
+
+    // Save the JWT in database
+    const dbToken = this.db.getRepository(Token).create({
+      ownerId: user.id,
+      lastIp: req.ips?.join(',') || req.ip,
+      openIp: req.ips?.join(',') || req.ip,
+      lastLoginAt: new Date(),
+      jti: jwtid,
+      expiresAt,
+      appId: application.id,
+      rights: rights.toString(),
+    });
+
+    await this.db.getRepository(Token).save(dbToken);
+
+    return { entity: dbToken, token: accessToken };
   }
 
   private async getLoggedClientFromTemporaryTokens(query: GetAccessTokenDto) {

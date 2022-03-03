@@ -49,6 +49,14 @@ export class TokenController {
     return await this.tokenService.createTokenForApplication(req, body);
   }
 
+  @Post('token/refresh')
+  @UseGuards(RateLimitGuard)
+  @Right(EApplicationRight.RefreshToken)
+  @RateLimit(5, Timing.minutes(15))
+  async refreshToken(@Req() req: Request) {
+    return await this.tokenService.refreshToken(req, req.user);
+  }
+
   @Get('token')
   @UseGuards(JwtAuthGuard, RightsGuard, RateLimitGuard)
   @Right(EApplicationRight.InternalUseOnly)

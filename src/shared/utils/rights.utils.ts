@@ -17,6 +17,7 @@ export function getRightsAsObject(rights: number): TRightsObject {
     pinQuestion: rights & EApplicationRight.PinQuestions,
     readRelationship: rights & EApplicationRight.ReadRelationship,
     manageBlockedWords: rights & EApplicationRight.ManageBlockedWords,
+    refreshToken: rights & EApplicationRight.RefreshToken,
   };
 
   for (const item in dto) {
@@ -41,6 +42,7 @@ export function getRightsFromBody(dto: ApplicationRightsDto, initialRights = 0) 
     [dto.pinQuestion, EApplicationRight.PinQuestions],
     [dto.readRelationship, EApplicationRight.ReadRelationship],
     [dto.manageBlockedWords, EApplicationRight.ManageBlockedWords],
+    [dto.refreshToken, EApplicationRight.RefreshToken],
   ];
 
   let rights = initialRights;

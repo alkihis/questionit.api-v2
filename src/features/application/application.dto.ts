@@ -54,6 +54,10 @@ export class ApplicationRightsDto {
   @IsBoolean()
   @IsOptional()
   manageBlockedWords: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  refreshToken: boolean;
 }
 
 export class CreateAppTokenDto {

@@ -26,6 +26,8 @@ export enum EApplicationRight {
   ManageBlockedWords    = 0b00001000000000000,
   // Right created to ignore token from external apps. Cannot be obtained by external tokens.
   InternalUseOnly       = 0b00010000000000000,
+  // ---
+  RefreshToken          = 0b00100000000000000,
 }
 
 // All rights
