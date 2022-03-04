@@ -7,6 +7,7 @@ const config = {
   ENV_IS: {
     DEV: process.env.NODE_ENV === 'development',
     PROD: process.env.NODE_ENV === 'production',
+    MIGRATION: process.env.IS_MIGRATION === 'true',
   },
   URL: process.env.QUESTIONIT_API_URL || 'http://localhost:5001',
   WEB_URL: process.env.WEB_URL || 'http://localhost:5002',
@@ -15,6 +16,8 @@ const config = {
   DB: {
     USER: process.env.DB_USER || 'questionit',
     PASSWORD: process.env.DB_PASSWORD || 'questionit',
+    SUPERUSER: process.env.DB_SUPERUSER || 'questionit',
+    SUPERUSER_PASSWORD: process.env.DB_SUPERPASSWORD || 'questionit',
     HOST: process.env.DB_HOST || 'postgres',
     DATABASE: process.env.DB_DATABASE || 'questionit',
     LOGGING: (process.env.NODE_ENV === 'development' ? ['query', 'error', 'schema', 'warn', 'info', 'log'] : ['error']) as LoggerOptions,
