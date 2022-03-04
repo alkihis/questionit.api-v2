@@ -2,7 +2,7 @@
 
 > API service for QuestionIt.space
 
-**This is public API of QuestionIt.space**. Please see bootstrap to access all projects.
+**This is public API of QuestionIt.space**. Please see [bootstrap](https://github.com/alkihis/questionit.bootstrap) to access all projects.
 
 ### Tech stack:
 - Nest.js 8
