@@ -4,3 +4,4 @@ node_modules/
 .idea/
 uploads/*
 tsconfig.build.tsbuildinfo
+data/add.day.questions.json.dist

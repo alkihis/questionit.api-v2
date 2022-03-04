@@ -59,6 +59,7 @@ export class NotificationService {
         .leftJoin('question.answer', 'answer')
         .where('question.receiverId = :userId', { userId: user.id })
         .andWhere('answer.id IS NULL')
+        .andWhere('question.muted = FALSE')
         .getCount();
     }
 
