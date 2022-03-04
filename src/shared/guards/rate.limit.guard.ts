@@ -28,7 +28,8 @@ export class RateLimitGuard extends ThrottlerGuard {
     const loggedUser = req.user as RequestUserManager;
 
     if (loggedUser) {
-      return `logged-user-${loggedUser.id}`;
+      const appId = loggedUser.requestTokenInformation.applicationId || 'native';
+      return `logged-user-${appId}-${loggedUser.id}`;
     }
     // Fallback to IP tracking if user is not logged
     return req.ips.length ? req.ips[0] : req.ip;
