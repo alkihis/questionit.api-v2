@@ -1,4 +1,4 @@
-import { IsBoolean, IsDate, IsIn, IsInt, IsNotEmpty, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
+import { IsBoolean, IsDate, IsIn, IsInt, IsNotEmpty, IsOptional, IsString, Max, MaxLength } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { BooleanTransformer, DateTimeTransformer, NumberTransformer } from '../../shared/utils/transformers.utils';
 import config from '../../shared/config/config';

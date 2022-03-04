@@ -1,4 +1,4 @@
-import { IsIn, IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { IsIn, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { NumberTransformer } from '../transformers.utils';
 
@@ -35,5 +35,6 @@ export class PaginationWithIdsDto {
   @IsInt()
   @IsOptional()
   @Min(1)
+  @Max(100)
   pageSize: number = 20;
 }
