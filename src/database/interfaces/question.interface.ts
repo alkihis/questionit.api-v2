@@ -12,7 +12,7 @@ export interface ISentQuestion {
   inReplyToQuestionId: string | null;
   questionOfTheDay: boolean;
   replyCount: number;
-  attachments?: SentQuestionAttachments;
+  attachments?: ISentQuestionAttachments;
 }
 
 export interface ISentAnswer {
@@ -29,7 +29,7 @@ export interface ISentAnswerAttachment {
   type: 'image' | 'gif';
 }
 
-export interface SentQuestionAttachments {
+export interface ISentQuestionAttachments {
   poll?: ISentPoll;
 }
 
