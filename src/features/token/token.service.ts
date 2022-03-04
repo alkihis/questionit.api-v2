@@ -40,6 +40,7 @@ export class TokenService {
 
   private static readonly internalTokenExpiration = Timing.days(31);
   private static readonly appTokenExpiration = Timing.hours(2);
+  private static readonly refreshableAppTokenExpiration = Timing.days(60);
 
   async getRequestToken() {
     const client = this.twitterService.getLoginClient();
@@ -229,7 +230,8 @@ export class TokenService {
     const jwtid = uuid();
 
     // Generate a JWT
-    const expiresIn = TokenService.appTokenExpiration.asSeconds;
+    const refreshable = (rights & EApplicationRight.RefreshToken) !== 0;
+    const expiresIn = (refreshable ? TokenService.refreshableAppTokenExpiration : TokenService.appTokenExpiration).asSeconds;
     const expiresAt = DateTime.utc().plus({ second: expiresIn }).toJSDate();
 
     const accessToken = await this.jwtService.signAsync({
