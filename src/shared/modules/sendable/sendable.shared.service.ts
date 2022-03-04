@@ -197,7 +197,7 @@ export class SendableSharedService {
       };
 
       if (polls[question.id]) {
-        sentQuestion.attachements = {
+        sentQuestion.attachments = {
           poll: {
             id: polls[question.id].id,
             options: polls[question.id].options,
