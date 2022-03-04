@@ -1,5 +1,5 @@
 import { PaginationWithIdsDto } from '../../shared/utils/pagination/pagination.dto';
-import { IsArray, IsBoolean, IsNotEmpty, IsOptional, IsString, Matches, Max, MaxLength } from 'class-validator';
+import { ArrayMaxSize, IsArray, IsBoolean, IsNotEmpty, IsOptional, IsString, Matches, Max, MaxLength } from 'class-validator';
 import config from '../../shared/config/config';
 import { Transform } from 'class-transformer';
 import { BooleanTransformer } from '../../shared/utils/transformers.utils';
@@ -19,6 +19,7 @@ export class BlockedWordsDto {
   @IsString({ each: true })
   @IsArray()
   @Matches(config.LIMITS.BLOCKED_WORDS_REGEX, { each: true })
+  @ArrayMaxSize(255)
   words: string[];
 }
 
