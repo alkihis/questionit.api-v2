@@ -201,8 +201,7 @@ export class QuestionService {
       this.db.getRepository(Question)
         .createQueryBuilder('question')
         .innerJoinAndSelect('question.answer', 'answer')
-        .where('answer.id IS NOT NULL')
-        .andWhere('question.id = :inReplyToQuestionId', { inReplyToQuestionId: dto.inReplyToQuestionId })
+        .where('question.id = :inReplyToQuestionId', { inReplyToQuestionId: dto.inReplyToQuestionId })
         .getOneOrFail(),
       EApiError.OriginalQuestionNotFound,
     );

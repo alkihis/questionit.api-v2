@@ -87,6 +87,7 @@ export class SendableQuestionSharedService {
       .createQueryBuilder('question')
       .select('question.inReplyToQuestionId', 'questionid')
       .addSelect('COUNT(question.id)', 'replies')
+      .innerJoin('question.answer', 'answer')
       .where('question.inReplyToQuestionId IN (:...questionIds)', { questionIds })
       .groupBy('question.inReplyToQuestionId')
       .orderBy('question.inReplyToQuestionId')
