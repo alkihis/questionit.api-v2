@@ -10,7 +10,7 @@ export class AppController {
   @Get()
   @UseGuards(JwtOrAnonymousAuthGuard, RateLimitGuard)
   @RateLimit(120)
-  getHello(): string {
+  getHello() {
     return this.appService.getHello();
   }
 }
