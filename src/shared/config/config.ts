@@ -4,6 +4,7 @@ import type { LoggerOptions } from 'typeorm';
 const rootDir = path.resolve(__dirname, '..', '..', '..');
 
 const config = {
+  VERSION: process.env.APP_VERSION || '2.0.0',
   ENV_IS: {
     DEV: process.env.NODE_ENV === 'development',
     PROD: process.env.NODE_ENV === 'production',
