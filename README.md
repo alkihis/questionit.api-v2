@@ -42,7 +42,6 @@
     - `utils`: Shared utils about everything: string, regex, query parsing and more
     - `workers`: Files that should run in a dedicated `worker_thread`
   - `static`: `serve-static` configuration
-  - `v1-migration`: Bunch of scripts able to convert beta v1 QuestionIt.space data to current application
 - `data`: JSON-files meant to store basic data
 - `uploads`: Structure for POST file upload and file processing
 
