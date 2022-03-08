@@ -21,7 +21,6 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "typeorm": "typeorm",
-    "legacy:migrate": "node dist/bootstraps/migration.bootstrap.js",
     "cli": "node dist/bootstraps/cli.bootstrap.js",
     "create:migration": "typeorm migration:create",
     "generate:migration": "typeorm migration:generate",
