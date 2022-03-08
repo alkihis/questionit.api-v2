@@ -13,6 +13,7 @@
 - Nest.js 8
 - TypeORM 0.2
 - PostgreSQL 14
+- Redis 6
 - twitter-api-v2 1.11
 - Node 14+
 
@@ -47,8 +48,8 @@
 
 ## Run
 
-See bootstrap to learn how service can be started in dev mode.
+See bootstrap to learn how service can be started.
 
 ## Endpoint documentation
 
-For endpoint documentation, see API docs.
+For endpoint documentation, see [API docs](https://docs.questionit.space).
