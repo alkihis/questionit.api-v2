@@ -10,6 +10,9 @@ const config = {
     PROD: process.env.NODE_ENV === 'production',
     MIGRATION: process.env.IS_MIGRATION === 'true',
   },
+  CORS: {
+    DOMAIN: process.env.CORS_ROOT_DOMAIN || 'questionit.space',
+  },
   URL: process.env.QUESTIONIT_API_URL || 'http://localhost:5001',
   WEB_URL: process.env.WEB_URL || 'http://localhost:5002',
   WEB_PUBLIC_URL: process.env.WEB_PUBLIC_URL || 'https://questionit.space',

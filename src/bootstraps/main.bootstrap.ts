@@ -15,9 +15,17 @@ export async function bootstrap() {
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  app.enableCors();
-  app.set('trust proxy', 1);
+  if (config.ENV_IS.DEV) {
+    app.enableCors();
+  } else {
+    const domain = config.CORS.DOMAIN;
+    // Allow {domain} and *.{domain}
+    const domainRegex = new RegExp(`^(.*\.)?${domain}$`);
 
+    app.enableCors({ origin: domainRegex });
+  }
+
+  app.set('trust proxy', 1);
   app.useGlobalFilters(new ErrorFilter());
 
   await app.listen(5000);
