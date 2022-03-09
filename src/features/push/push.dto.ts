@@ -1,4 +1,4 @@
-import { IsObject, IsOptional, IsString } from 'class-validator';
+import { IsInt, IsObject, IsOptional, IsString } from 'class-validator';
 
 export class CreateSubscriptionDto {
   @IsOptional()
@@ -17,8 +17,8 @@ export class UpdateSubscriptionDto {
   @IsString()
   endpoint: string;
 
-  @IsString()
-  target: string;
+  @IsInt()
+  target: number;
 
   @IsString()
   token: string;
