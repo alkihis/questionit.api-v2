@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { InjectConnection } from '@nestjs/typeorm';
-import { Connection } from 'typeorm';
+import { InjectConnection, InjectDataSource } from '@nestjs/typeorm';
+import { Connection, DataSource } from 'typeorm';
 import { User } from '../../../database/entities/user.entity';
 import { Relationship } from '../../../database/entities/relationship.entity';
 import { Block } from '../../../database/entities/block.entity';
@@ -11,7 +11,7 @@ export type TPreloadedRelationships = { [userId: number]: ISentRelationship };
 @Injectable()
 export class SendableRelationshipSharedService {
   constructor(
-    @InjectConnection() private db: Connection,
+    @InjectDataSource() private db: DataSource,
   ) {}
 
   async followingsOf(user: User) {

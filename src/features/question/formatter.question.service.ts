@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { InjectConnection } from '@nestjs/typeorm';
-import { Connection } from 'typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 import config from '../../shared/config/config';
 import { Question } from '../../database/entities/question.entity';
 import { User } from '../../database/entities/user.entity';
@@ -8,7 +8,7 @@ import { User } from '../../database/entities/user.entity';
 @Injectable()
 export class FormatterQuestionService {
   constructor(
-    @InjectConnection() private db: Connection,
+    @InjectDataSource() private db: DataSource,
   ) {}
 
   getCleanedQuestionText(text: string) {

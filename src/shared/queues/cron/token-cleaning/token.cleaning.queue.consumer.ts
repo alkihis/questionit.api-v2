@@ -1,15 +1,15 @@
 import { Process, Processor, OnQueueCompleted } from '@nestjs/bull';
 import { EQueueCronName } from '../../queue.enum';
 import { Logger } from '@nestjs/common';
-import { InjectConnection } from '@nestjs/typeorm';
-import { Connection } from 'typeorm';
+import { InjectConnection, InjectDataSource } from '@nestjs/typeorm';
+import { Connection, DataSource } from 'typeorm';
 import { DateTime } from 'luxon';
 import { Token } from '../../../../database/entities/token.entity';
 
 @Processor(EQueueCronName.TokenCleaning)
 export class TokenCleaningQueueConsumer {
   constructor(
-    @InjectConnection() private db: Connection,
+    @InjectDataSource() private db: DataSource,
   ) {}
 
   @Process()

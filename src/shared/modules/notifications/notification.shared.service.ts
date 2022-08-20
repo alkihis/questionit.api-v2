@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { InjectConnection } from '@nestjs/typeorm';
-import { Connection } from 'typeorm';
+import { InjectConnection, InjectDataSource } from '@nestjs/typeorm';
+import { Connection, DataSource } from 'typeorm';
 import webpush from 'web-push';
 import { ENotificationType, TNotificationContentPayload } from '../../../database/interfaces/notification.interface';
 import { PushMessage } from '../../../database/entities/push.message.entity';
@@ -22,7 +22,7 @@ export interface IMakeNotificationParams {
 @Injectable()
 export class NotificationSharedService {
   constructor(
-    @InjectConnection() private db: Connection,
+    @InjectDataSource() private db: DataSource,
   ) {}
 
   async makeNotification({ targetUserId, type, relatedToId }: IMakeNotificationParams) {

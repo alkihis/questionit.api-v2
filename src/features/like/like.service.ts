@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { InjectConnection } from '@nestjs/typeorm';
-import { Connection } from 'typeorm';
+import { InjectConnection, InjectDataSource } from '@nestjs/typeorm';
+import { Connection, DataSource } from 'typeorm';
 import { SendableSharedService } from '../../shared/modules/sendable/sendable.shared.service';
 import { Question } from '../../database/entities/question.entity';
 import { ErrorService } from '../../shared/modules/errors/error.service';
@@ -13,7 +13,7 @@ import { RequestContextService } from '../../shared/modules/context/request.cont
 @Injectable()
 export class LikeService {
   constructor(
-    @InjectConnection() private db: Connection,
+    @InjectDataSource() private db: DataSource,
     private sendableService: SendableSharedService,
     private blockSharedService: BlockSharedService,
     private requestContextService: RequestContextService,

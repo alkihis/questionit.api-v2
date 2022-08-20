@@ -4,8 +4,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import config from '../config/config';
 import { EApiError } from '../modules/errors/error.enum';
 import { ErrorService } from '../modules/errors/error.service';
-import { InjectConnection } from '@nestjs/typeorm';
-import { Connection } from 'typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 import { RequestUserManager } from '../managers/request.user.manager';
 import { Token } from '../../database/entities/token.entity';
 import { QuestionItApplication } from '../../database/entities/questionit.application.entity';
@@ -30,7 +30,7 @@ export interface IFullJwt extends IJwt {
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
-    @InjectConnection() private db: Connection,
+    @InjectDataSource() private db: DataSource,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -47,7 +47,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
     // Verify if token exists
     const entity = await this.db.getRepository(Token)
-      .findOne({ jti: payload.jti });
+      .findOneBy({ jti: payload.jti });
 
     if (!entity) {
       throw ErrorService.throw(EApiError.InvalidExpiredToken, { reason: 'Token not found' });
@@ -60,7 +60,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       }
 
       // Check if app exists
-      const app = await this.db.getRepository(QuestionItApplication).findOne({ id: entity.appId });
+      const app = await this.db.getRepository(QuestionItApplication).findOneBy({ id: entity.appId });
 
       if (!app || app.key !== key) {
         // App deleted or invalid app key
@@ -78,7 +78,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       .catch(error => Logger.error(`Unable to update token ${entity.id} for user ${payload.userId}: ${error.stack}`));
 
     // Verify if user exists
-    const user = await this.db.getRepository(User).findOne({ id: Number(payload.userId) || -1 });
+    const user = await this.db.getRepository(User).findOneBy({ id: Number(payload.userId) || -1 });
 
     if (!user) {
       throw ErrorService.throw(EApiError.UserNotFound, { reason: 'User not found' });

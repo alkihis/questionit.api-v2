@@ -1,8 +1,8 @@
-import type { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ENTITIES } from './entities';
 import config from '../shared/config/config';
+import type { DataSourceOptions } from 'typeorm';
 
-export const DB_CONFIG: TypeOrmModuleOptions = {
+export const DB_CONFIG: DataSourceOptions = {
   type: 'postgres',
   host: config.DB.HOST,
   port: 5432,
@@ -13,9 +13,10 @@ export const DB_CONFIG: TypeOrmModuleOptions = {
   logging: config.DB.LOGGING,
   migrationsRun: false,
   migrations: [__dirname + '/migrations/**/*{.ts,.js}'],
-  cli: {
-    // Location of migration should be inside src folder
-    // to be compiled into dist/ folder.
-    migrationsDir: 'src/database/migrations',
-  },
+  // TODO write script to use TypeORM 0.3.x migration system.
+  // cli: {
+  //   // Location of migration should be inside src folder
+  //   // to be compiled into dist/ folder.
+  //   migrationsDir: 'src/database/migrations',
+  // },
 };

@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { InjectConnection } from '@nestjs/typeorm';
-import { Connection } from 'typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { TwitterApi } from 'twitter-api-v2';
 import config from '../../shared/config/config';
@@ -31,7 +31,7 @@ import { RequestContextService } from '../../shared/modules/context/request.cont
 @Injectable()
 export class TokenService {
   constructor(
-    @InjectConnection() private db: Connection,
+    @InjectDataSource() private db: DataSource,
     private readonly jwtService: JwtService,
     private readonly twitterService: TwitterService,
     private readonly sendableService: SendableSharedService,
@@ -123,7 +123,7 @@ export class TokenService {
     const { appToken, application } = await this.getAppAndTokenFromCreateTokenRequest(dto);
     const tokenData = await this.decodeAppTokenData(appToken.token);
     const user = await ErrorService.fulfillOrHttpException(
-      this.db.getRepository(User).findOneOrFail({ id: appToken.ownerId }),
+      this.db.getRepository(User).findOneByOrFail({ id: appToken.ownerId }),
       EApiError.UserNotFound,
     );
 
@@ -153,7 +153,7 @@ export class TokenService {
       token = user.requestTokenInformation.tokenId;
     }
 
-    const entity = await this.db.getRepository(Token).findOne({ jti: token });
+    const entity = await this.db.getRepository(Token).findOneBy({ jti: token });
 
     if (!entity) {
       throw ErrorService.throw(EApiError.ResourceNotFound, { missing: 'Requested token does not exists.' });
@@ -170,7 +170,7 @@ export class TokenService {
 
   async listTokens() {
     const user = this.requestContextService.user;
-    const tokens = this.sendableService.getSendableTokens(await this.db.getRepository(Token).find({ ownerId: user.id }));
+    const tokens = this.sendableService.getSendableTokens(await this.db.getRepository(Token).findBy({ ownerId: user.id }));
     const currentToken = tokens.find(t => t.jti === user.requestTokenInformation.tokenId);
 
     if (currentToken) {
@@ -191,7 +191,7 @@ export class TokenService {
     } else {
       const rights = user.rights;
       const application = await ErrorService.fulfillOrHttpException(
-        this.db.getRepository(QuestionItApplication).findOneOrFail(Number(user.requestTokenInformation.applicationId) || -1),
+        this.db.getRepository(QuestionItApplication).findOneByOrFail({ id: Number(user.requestTokenInformation.applicationId) || -1 }),
         EApiError.ApplicationNotFound,
       );
 
@@ -289,7 +289,7 @@ export class TokenService {
     const twitterUser = await ErrorService.fulfillOrHttpException(client.currentUser(), EApiError.InvalidTwitterCredentials);
 
     const userRepository = this.db.getRepository(User);
-    let localUser = await userRepository.findOne({ twitterId: twitterUser.id_str });
+    let localUser = await userRepository.findOneBy({ twitterId: twitterUser.id_str });
 
     if (!localUser) {
       let slug = twitterUser.screen_name.slice(0, config.LIMITS.SLUG_LENGTH); // 20 chars
@@ -299,12 +299,12 @@ export class TokenService {
       }
 
       // Check if the slug exists (searchs are made case-insensitive in mysql with utf8mb4 default collation)
-      let matchingSlug = await userRepository.findOne({ slug });
+      let matchingSlug = await userRepository.findOneBy({ slug });
 
       // Find a new slug that is not used
       while (matchingSlug) {
         slug = slug.slice(0, 10) + '_' + Math.random().toString().slice(2, 9);
-        matchingSlug = await userRepository.findOne({ slug });
+        matchingSlug = await userRepository.findOneBy({ slug });
       }
 
       // Create the user

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { InjectConnection } from '@nestjs/typeorm';
-import { Connection } from 'typeorm';
+import { InjectConnection, InjectDataSource } from '@nestjs/typeorm';
+import { Connection, DataSource } from 'typeorm';
 import { User } from '../../../database/entities/user.entity';
 import { Question } from '../../../database/entities/question.entity';
 import { Answer } from '../../../database/entities/answer.entity';
@@ -16,7 +16,7 @@ export type TPreloadedAnswersOfQuestions = { [questionId: number]: ISentAnswer }
 @Injectable()
 export class SendableQuestionSharedService {
   constructor(
-    @InjectConnection() private db: Connection,
+    @InjectDataSource() private db: DataSource,
     private mediasService: MediasService,
   ) {}
 

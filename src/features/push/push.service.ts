@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { InjectConnection } from '@nestjs/typeorm';
-import { Connection } from 'typeorm';
+import { InjectConnection, InjectDataSource } from '@nestjs/typeorm';
+import { Connection, DataSource } from 'typeorm';
 import urlSafeBase64 from 'urlsafe-base64';
 import config from '../../shared/config/config';
 import { JwtService } from '@nestjs/jwt';
@@ -17,7 +17,7 @@ import { RequestContextService } from '../../shared/modules/context/request.cont
 @Injectable()
 export class PushService {
   constructor(
-    @InjectConnection() private db: Connection,
+    @InjectDataSource() private db: DataSource,
     private readonly jwtService: JwtService,
     private readonly requestContextService: RequestContextService,
   ) {}

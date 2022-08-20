@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { InjectConnection } from '@nestjs/typeorm';
-import { Connection } from 'typeorm';
+import { InjectConnection, InjectDataSource } from '@nestjs/typeorm';
+import { Connection, DataSource } from 'typeorm';
 import { RequestUserManager } from '../../shared/managers/request.user.manager';
 import { SendableSharedService } from '../../shared/modules/sendable/sendable.shared.service';
 import { ErrorService } from '../../shared/modules/errors/error.service';
@@ -22,7 +22,7 @@ export type TEditProfileFiles = { [K in 'avatar' | 'background']: Express.Multer
 @Injectable()
 export class UserService {
   constructor(
-    @InjectConnection() private db: Connection,
+    @InjectDataSource() private db: DataSource,
     private sendableService: SendableSharedService,
     private blockSharedService: BlockSharedService,
     private twitterService: TwitterService,
@@ -44,7 +44,7 @@ export class UserService {
 
   async getUserById(id: number) {
     const user = this.requestContextService.user;
-    const targetUser = await ErrorService.fulfillOrHttpException(this.db.getRepository(User).findOneOrFail({ id }), EApiError.UserNotFound);
+    const targetUser = await ErrorService.fulfillOrHttpException(this.db.getRepository(User).findOneByOrFail({ id }), EApiError.UserNotFound);
     return await this.getUserFromEntity(user, targetUser);
   }
 

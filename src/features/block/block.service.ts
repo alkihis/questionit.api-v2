@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { InjectConnection } from '@nestjs/typeorm';
-import { Connection, In } from 'typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource, In } from 'typeorm';
 import { SendableRelationshipSharedService } from '../../shared/modules/sendable/sendable.relationship.shared.service';
 import { ErrorService } from '../../shared/modules/errors/error.service';
 import { EApiError } from '../../shared/modules/errors/error.enum';
@@ -13,7 +13,7 @@ import { RequestContextService } from '../../shared/modules/context/request.cont
 @Injectable()
 export class BlockService {
   constructor(
-    @InjectConnection() private db: Connection,
+    @InjectDataSource() private db: DataSource,
     private readonly sendableRelationshipService: SendableRelationshipSharedService,
     private readonly requestContextService: RequestContextService,
   ) {}

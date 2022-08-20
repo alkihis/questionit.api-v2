@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { InjectConnection } from '@nestjs/typeorm';
-import { Connection } from 'typeorm';
+import { InjectConnection, InjectDataSource } from '@nestjs/typeorm';
+import { Connection, DataSource } from 'typeorm';
 import { User } from '../../../database/entities/user.entity';
 import { ErrorService } from '../errors/error.service';
 import { EApiError } from '../errors/error.enum';
@@ -14,7 +14,7 @@ import { MediasService } from '../medias/medias.service';
 @Injectable()
 export class TwitterService {
   constructor(
-    @InjectConnection() private db: Connection,
+    @InjectDataSource() private db: DataSource,
     private mediasService: MediasService,
   ) {}
 

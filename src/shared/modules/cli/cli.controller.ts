@@ -1,6 +1,6 @@
 import { Controller } from '@nestjs/common';
-import { InjectConnection } from '@nestjs/typeorm';
-import { Connection, Like } from 'typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource, Like } from 'typeorm';
 import CliHelper, { CliListener } from 'interactive-cli-helper';
 import { User } from '../../../database/entities/user.entity';
 import { DayQuestion } from '../../../database/entities/day.question.entity';
@@ -23,7 +23,7 @@ export class CliModuleController {
   private currentUserId = 0;
 
   constructor(
-    @InjectConnection() private db: Connection,
+    @InjectDataSource() private db: DataSource,
   ) {
     setTimeout(() => this.initCli(), 1500);
   }
@@ -109,7 +109,7 @@ export class CliModuleController {
     });
 
     cli.command('get', async rest => {
-      const result = await userRepository.findOne({
+      const result = await userRepository.findOneBy({
         slug: rest,
       });
 
@@ -129,7 +129,7 @@ export class CliModuleController {
         return 'Invalid user ID.';
       }
 
-      const user = await userRepository.findOne({ id: Number(rest) });
+      const user = await userRepository.findOneBy({ id: Number(rest) });
       if (!user) {
         return 'User not found.';
       }
@@ -199,7 +199,7 @@ export class CliModuleController {
 
       for (const question of parsedFile.questions) {
         if (question.id) {
-          const existingQuestion = await repository.findOneOrFail(question.id);
+          const existingQuestion = await repository.findOneByOrFail({ id: question.id });
 
           if (question.en) {
             existingQuestion.content.en = question.en;

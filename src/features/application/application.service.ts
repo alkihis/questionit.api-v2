@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { InjectConnection } from '@nestjs/typeorm';
-import { Connection } from 'typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 import { ErrorService } from '../../shared/modules/errors/error.service';
 import { ApplicationToken } from '../../database/entities/application.token.entity';
 import { EApiError } from '../../shared/modules/errors/error.enum';
@@ -22,7 +22,7 @@ import { RequestContextService } from '../../shared/modules/context/request.cont
 @Injectable()
 export class ApplicationService {
   constructor(
-    @InjectConnection() private db: Connection,
+    @InjectDataSource() private db: DataSource,
     private sendableService: SendableSharedService,
     private readonly requestContextService: RequestContextService,
   ) {}
@@ -48,7 +48,7 @@ export class ApplicationService {
 
   async createAppToken(dto: CreateAppTokenDto) {
     const application = await ErrorService.fulfillOrHttpException(
-      this.db.getRepository(QuestionItApplication).findOneOrFail({ key: dto.key }),
+      this.db.getRepository(QuestionItApplication).findOneByOrFail({ key: dto.key }),
       EApiError.ApplicationNotFound,
     );
 

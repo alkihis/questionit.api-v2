@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { InjectConnection } from '@nestjs/typeorm';
-import { Connection, In } from 'typeorm';
+import { InjectConnection, InjectDataSource } from '@nestjs/typeorm';
+import { Connection, DataSource, In } from 'typeorm';
 import { User } from '../../../database/entities/user.entity';
 import { Question } from '../../../database/entities/question.entity';
 import { ISentUser } from '../../../database/interfaces/user.interface';
@@ -51,7 +51,7 @@ export enum EImageType {
 @Injectable()
 export class SendableSharedService {
   constructor(
-    @InjectConnection() private db: Connection,
+    @InjectDataSource() private db: DataSource,
     private sendableQuestionService: SendableQuestionSharedService,
     private sendableUserService: SendableUserSharedService,
     private sendableRelationshipService: SendableRelationshipSharedService,

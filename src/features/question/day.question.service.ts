@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { InjectConnection } from '@nestjs/typeorm';
-import { Connection } from 'typeorm';
+import { InjectConnection, InjectDataSource } from '@nestjs/typeorm';
+import { Connection, DataSource } from 'typeorm';
 import RandomSeed from 'random-seed';
 import { RequestUserManager } from '../../shared/managers/request.user.manager';
 import { ErrorService } from '../../shared/modules/errors/error.service';
@@ -16,7 +16,7 @@ import { RequestContextService } from '../../shared/modules/context/request.cont
 @Injectable()
 export class DayQuestionService {
   constructor(
-    @InjectConnection() private db: Connection,
+    @InjectDataSource() private db: DataSource,
     private sendableService: SendableSharedService,
     private requestContextService: RequestContextService,
   ) {}

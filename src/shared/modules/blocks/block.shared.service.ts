@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { InjectConnection } from '@nestjs/typeorm';
-import { Connection } from 'typeorm';
+import { InjectConnection, InjectDataSource } from '@nestjs/typeorm';
+import { Connection, DataSource } from 'typeorm';
 import { RequestUserManager } from '../../managers/request.user.manager';
 import { Block } from '../../../database/entities/block.entity';
 import { ErrorService } from '../errors/error.service';
@@ -9,7 +9,7 @@ import { EApiError } from '../errors/error.enum';
 @Injectable()
 export class BlockSharedService {
   constructor(
-    @InjectConnection() private db: Connection,
+    @InjectDataSource() private db: DataSource,
   ) {}
 
   async ensureNoBlocksExists(sourceUserId: number, targetUserId: number) {

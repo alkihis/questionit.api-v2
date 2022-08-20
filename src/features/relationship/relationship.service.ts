@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { InjectConnection } from '@nestjs/typeorm';
-import { Connection } from 'typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 import { User } from '../../database/entities/user.entity';
 import { ErrorService } from '../../shared/modules/errors/error.service';
 import { EApiError } from '../../shared/modules/errors/error.enum';
@@ -19,7 +19,7 @@ import { RequestContextService } from '../../shared/modules/context/request.cont
 @Injectable()
 export class RelationshipService {
   constructor(
-    @InjectConnection() private db: Connection,
+    @InjectDataSource() private db: DataSource,
     private sendableService: SendableSharedService,
     private sendableRelationshipService: SendableRelationshipSharedService,
     private notificationSharedService: NotificationSharedService,

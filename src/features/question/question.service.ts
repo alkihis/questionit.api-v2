@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { InjectConnection } from '@nestjs/typeorm';
-import { Connection, In } from 'typeorm';
+import { InjectConnection, InjectDataSource } from '@nestjs/typeorm';
+import { Connection, DataSource, In } from 'typeorm';
 import { RequestUserManager } from '../../shared/managers/request.user.manager';
 import { AnswerQuestionDto, GetQuestionAncestorsDto, GetQuestionOfUserDto, GetQuestionRepliesDto, GetQuestionTimelineDto, GetWaitingQuestionsDto, MakeQuestionDto } from './question.dto';
 import { ErrorService } from '../../shared/modules/errors/error.service';
@@ -58,7 +58,7 @@ interface IAnswerToTwitterParams {
 @Injectable()
 export class QuestionService {
   constructor(
-    @InjectConnection() private db: Connection,
+    @InjectDataSource() private db: DataSource,
     private dayQuestionService: DayQuestionService,
     private formatterQuestionService: FormatterQuestionService,
     private sendableService: SendableSharedService,

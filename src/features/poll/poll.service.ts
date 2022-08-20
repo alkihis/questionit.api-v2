@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { InjectConnection } from '@nestjs/typeorm';
-import { Connection } from 'typeorm';
+import { InjectConnection, InjectDataSource } from '@nestjs/typeorm';
+import { Connection, DataSource } from 'typeorm';
 import { MakePollDto } from './poll.dto';
 import { cleanBlankCharacters } from '../../shared/utils/string.utils';
 import { Poll } from '../../database/entities/poll.entity';
@@ -11,7 +11,7 @@ import { RequestContextService } from '../../shared/modules/context/request.cont
 @Injectable()
 export class PollService {
   constructor(
-    @InjectConnection() private db: Connection,
+    @InjectDataSource() private db: DataSource,
     private requestContextService: RequestContextService,
   ) {}
 

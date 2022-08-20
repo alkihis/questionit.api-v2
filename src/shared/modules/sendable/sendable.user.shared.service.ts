@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { InjectConnection } from '@nestjs/typeorm';
-import { Connection } from 'typeorm';
+import { InjectConnection, InjectDataSource } from '@nestjs/typeorm';
+import { Connection, DataSource } from 'typeorm';
 import { User } from '../../../database/entities/user.entity';
 import { ISentUserCounts } from '../../../database/interfaces/user.interface';
 import { Answer } from '../../../database/entities/answer.entity';
@@ -11,7 +11,7 @@ export type TPreloadedUserCounts = { [userId: number]: ISentUserCounts };
 @Injectable()
 export class SendableUserSharedService {
   constructor(
-    @InjectConnection() private db: Connection,
+    @InjectDataSource() private db: DataSource,
   ) {}
 
   async preloadCountsForUsers(users: User[]) {
